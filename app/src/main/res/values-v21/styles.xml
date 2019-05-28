@@ -1,0 +1,15 @@
+<resources>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="SwitchTheme" parent="Theme.AppCompat.Light">
+        <item name="android:colorControlNormal">@color/design_default_color_primary</item>
+        <item name="android:colorControlActivated">@color/design_default_color_primary_dark</item>
+        <item name="colorSwitchThumbNormal">@color/purple</item>
+        <item name="android:colorForeground">@color/pale_purple</item>
+    </style>
+
+</resources>
