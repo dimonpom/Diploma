@@ -3,21 +3,18 @@ package com.example.diplim;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.DragAndDropPermissions;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.example.diplim.CustomListViews.CAdapterStudents;
-import com.example.diplim.CustomListViews.StudentsModel;
+import com.example.diplim.dbModels.StudentsModel;
 
 import java.util.ArrayList;
 
@@ -27,11 +24,10 @@ public class SessionActivity extends AppCompatActivity {
     ListView listView;
     final Context context = this;
 
-    private Menu menu;
-    private MenuItem menuItem;
-    private String exDate;
     private static CAdapterStudents adapterStudents;
     private EditText ed_question, ed_ans1, ed_ans2, ed_ans3, ed_ans4;
+    private TextView tv_subject, tv_date;
+    private String exSubject, exTheme, exDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +35,18 @@ public class SessionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_session);
 
         Bundle args = getIntent().getExtras();
-        String exSubject = args.getString("subject");
-        String exTheme = args.getString("theme");
-        exDate = args.getString("date");
-        setTitle(exTheme+" "+exSubject);
-        //menu.findItem(R.id.menu_date).setTitle("Exple");
+        if (args!=null){
+            exSubject = args.getString("subject");
+            exTheme = args.getString("theme");
+            exDate = args.getString("date");
+        }
 
+        //setTitle(exTheme+" "+exSubject);
+        //menu.findItem(R.id.menu_date).setTitle("Exple");
+        initializeXML();
+
+        tv_subject.setText(exSubject);
+        tv_date.setText(exDate);
 
         listView = findViewById(R.id.lv_students);
         studentsModels = new ArrayList<>();
@@ -59,14 +61,9 @@ public class SessionActivity extends AppCompatActivity {
         listView.setAdapter(adapterStudents);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-       // super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu_session, menu);
-        this.menu = menu;
-        menuItem = menu.findItem(R.id.menu_date);
-        menuItem.setTitle(convertDate(exDate));
-        return true;
+    private void initializeXML() {
+        tv_subject = findViewById(R.id.tV_subject);
+        tv_date = findViewById(R.id.tV_date);
     }
 
     private String convertDate(String date){

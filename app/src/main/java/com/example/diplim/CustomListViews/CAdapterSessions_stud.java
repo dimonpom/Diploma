@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.diplim.R;
+import com.example.diplim.dbModels.DataModel_stud;
 
 import java.util.ArrayList;
 
@@ -37,7 +38,7 @@ public class CAdapterSessions_stud extends ArrayAdapter<DataModel_stud> {
             viewHolder1 = new ViewHolder1();
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.row_item_stud, parent, false);
-            viewHolder1.tDate = convertView.findViewById(R.id.tv_date);
+            viewHolder1.tDate = convertView.findViewById(R.id.tV_date);
             viewHolder1.tProfname = convertView.findViewById(R.id.tv_profName);
             viewHolder1.tSubject = convertView.findViewById(R.id.tv_subject);
 

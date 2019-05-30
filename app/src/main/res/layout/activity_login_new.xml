@@ -103,7 +103,7 @@
                 android:hint="Password"
                 android:inputType="textPassword"
                 android:paddingTop="@dimen/floating_hint_margin"
-                android:text="123123123" />
+                android:text="25435f" />
         </android.support.design.widget.TextInputLayout>
 
         <com.dd.processbutton.iml.ActionProcessButton

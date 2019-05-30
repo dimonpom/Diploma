@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.diplim.R;
+import com.example.diplim.dbModels.DataModel;
 
 import java.util.ArrayList;
 
@@ -55,7 +56,7 @@ public class CAdapterSessions extends ArrayAdapter<DataModel>{// {
             viewHolder = new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView =inflater.inflate(R.layout.row_item, parent, false);
-            viewHolder.tDate = convertView.findViewById(R.id.tv_date);
+            viewHolder.tDate = convertView.findViewById(R.id.tV_date);
             viewHolder.tTheme = convertView.findViewById(R.id.tv_group);
             viewHolder.tSubject = convertView.findViewById(R.id.tv_studName);
 

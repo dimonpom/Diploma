@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.diplim.R;
+import com.example.diplim.dbModels.StudentsModel;
 
 import java.util.ArrayList;
 

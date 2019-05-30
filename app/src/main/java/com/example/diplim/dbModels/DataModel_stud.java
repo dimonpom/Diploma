@@ -1,4 +1,4 @@
-package com.example.diplim.CustomListViews;
+package com.example.diplim.dbModels;
 
 public class DataModel_stud {
     int id;

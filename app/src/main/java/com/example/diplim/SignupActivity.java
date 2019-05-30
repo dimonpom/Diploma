@@ -39,6 +39,7 @@ public class SignupActivity extends AppCompatActivity {
     private JSONPlaceHolderAPI jsonPlaceHolderAPI;
 
     private String TOKEN;
+    private int StudID;
     private int ProfID;
     private int GroupID;
 
@@ -141,7 +142,11 @@ public class SignupActivity extends AppCompatActivity {
 
         if (!validate(name, email, password, passwordConfirm))
             return;
-
+        signupButton.setClickable(false);
+        loginLink.setClickable(false);
+        rbProf.setClickable(false);
+        rbStud.setClickable(false);
+        signupButton.setProgress(1);
         if (rbProf.isChecked()){
             isProf = true;
             CreateProfAccount(jsonPlaceHolderAPI, name, email, password);
@@ -158,21 +163,21 @@ public class SignupActivity extends AppCompatActivity {
             intent.putExtra("idProf", ProfID);
             intent.putExtra("token", TOKEN);
             startActivity(intent);
+            finish();
         }else {
             Intent intent = new Intent(SignupActivity.this, MainActivity_stud.class);
             intent.putExtra("idGroup", GroupID);
             intent.putExtra("token", TOKEN);
             startActivity(intent);
+            finish();
         }
     }
 
-    private void CreateStudAccount(JSONPlaceHolderAPI jsonPlaceHolderAPI, String stud_name, String stud_login, String stud_password, Integer stud_group){
+    private void CreateStudAccount(JSONPlaceHolderAPI jsonPlaceHolderAPI, String stud_name, String stud_login, String stud_password, final Integer stud_group){
         final Student_register student_register = new Student_register(stud_name, stud_login, stud_password, stud_group);
 
         Call<JSONResponseStud> call = jsonPlaceHolderAPI.createStudent(student_register);
-        signupButton.setClickable(false);
-        loginLink.setClickable(false);
-        signupButton.setProgress(1);
+
         call.enqueue(new Callback<JSONResponseStud>() {
             @Override
             public void onResponse(Call<JSONResponseStud> call, Response<JSONResponseStud> response) {
@@ -186,12 +191,15 @@ public class SignupActivity extends AppCompatActivity {
                     Student student = response.body().getAccount();
                     TOKEN = student.getToken();
                     GroupID = student.getGroup();
+                    StudID = student.getStudent_id();
                     signupContinue();
                 }else {
                     Toast.makeText(getApplicationContext(), server_message, Toast.LENGTH_LONG).show();
                 }
                 signupButton.setClickable(true);
                 loginLink.setClickable(true);
+                rbProf.setClickable(true);
+                rbStud.setClickable(true);
                 signupButton.setProgress(0);
             }
 
@@ -199,6 +207,8 @@ public class SignupActivity extends AppCompatActivity {
             public void onFailure(Call<JSONResponseStud> call, Throwable t) {
                 signupButton.setClickable(true);
                 loginLink.setClickable(true);
+                rbProf.setClickable(true);
+                rbStud.setClickable(true);
                 signupButton.setProgress(0);
                 Log.e(TAG, "-------Error when connecting register--------\n"+t.getMessage());
                 Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
@@ -210,9 +220,9 @@ public class SignupActivity extends AppCompatActivity {
         final Professor_register professor_register = new Professor_register(prof_name,prof_login,prof_password);
 
         Call<JSONResponseProf> call = jsonPlaceHolderAPI.createProfessor(professor_register);
-        signupButton.setClickable(false);
+        /*signupButton.setClickable(false);
         loginLink.setClickable(false);
-        signupButton.setProgress(1);
+        signupButton.setProgress(1);*/
         call.enqueue(new Callback<JSONResponseProf>() {
             @Override
             public void onResponse(Call<JSONResponseProf> call, Response<JSONResponseProf> response) {
@@ -232,6 +242,8 @@ public class SignupActivity extends AppCompatActivity {
                 }
                 signupButton.setClickable(true);
                 loginLink.setClickable(true);
+                rbProf.setClickable(true);
+                rbStud.setClickable(true);
                 signupButton.setProgress(0);
             }
 
@@ -239,6 +251,8 @@ public class SignupActivity extends AppCompatActivity {
             public void onFailure(Call<JSONResponseProf> call, Throwable t) {
                 signupButton.setClickable(true);
                 loginLink.setClickable(true);
+                rbProf.setClickable(true);
+                rbStud.setClickable(true);
                 signupButton.setProgress(0);
                 Log.e(TAG, "-------Error when connecting register--------\n"+t.getMessage());
                 Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();

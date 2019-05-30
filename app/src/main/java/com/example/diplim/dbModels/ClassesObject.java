@@ -1,4 +1,4 @@
-package com.example.diplim;
+package com.example.diplim.dbModels;
 
 public class ClassesObject {
     int id;

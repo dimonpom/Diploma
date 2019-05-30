@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -24,7 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.diplim.CustomListViews.CAdapterSessions;
-import com.example.diplim.CustomListViews.DataModel;
+import com.example.diplim.dbModels.DataModel;
 import com.example.diplim.dbModels.ClassPost;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -70,6 +69,25 @@ public class MainActivity extends AppCompatActivity {
 
     ListView listView;
 
+    boolean twice;
+    @Override
+    public void onBackPressed() {
+        if (twice){
+            Intent intent = new Intent(MainActivity.this, LoginActivity_new.class);
+            startActivity(intent);
+            finish();
+        }
+
+        Toast.makeText(getApplicationContext(), "Нажмите назад еще раз, чтобы выйти", Toast.LENGTH_SHORT).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                twice = false;
+            }
+        }, 3000);
+        twice = true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,20 +130,31 @@ public class MainActivity extends AppCompatActivity {
         //api.createSubject(jsonPlaceHolderAPI, "Prikolchik");
         //api.createGroup(jsonPlaceHolderAPI,"404", "gg");
 
-        /*listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                DataModel dataModel = dataModels.get(position);
-                boolean deleteSuccessful = new TableControllerClasses(context).delete(dataModel.getId());
-                if (deleteSuccessful){
-                    Toast.makeText(context, "Successfully deleted", Toast.LENGTH_SHORT);
-                }else{
-                    Toast.makeText(context, "Smth wrong", Toast.LENGTH_SHORT);
-                }
-                ((MainActivity) context).readDBRecords();
-                return false;
+                DataModel dataModel = classesList.get(position);
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Удаление данных")
+                        .setMessage("Удалить запись из бд?")
+                        .setCancelable(true)
+                        .setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+                return true;
             }
-        });*/
+        });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -156,6 +185,8 @@ public class MainActivity extends AppCompatActivity {
                 }, 2500);
             }
         });
+
+
     }
 
     private void initializeXML() {

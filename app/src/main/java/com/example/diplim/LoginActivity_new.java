@@ -32,12 +32,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LoginActivity_new extends AppCompatActivity {
 
-    private static final String TAG = "LoginActivity";
+    private static final String TAG = "LoginActivity_new";
     private static final int REQUEST_SIGNUP =0;
     private static final String MY_SHARED = "MySharedPreferencesEmail";
 
     private String TOKEN;
     private int ProfID;
+    private int StudID;
     private int GroupID;
 
     private boolean connectionResult;
@@ -116,14 +117,23 @@ public class LoginActivity_new extends AppCompatActivity {
     private void login() {
         String email = emailText.getText().toString();
         String password = passwordText.getText().toString();
-        if(!validate(email, password))
-            return;
-        if (password.equals("nocon")){
+        if (password.equals("prof")){
             Intent intent = new Intent(LoginActivity_new.this, MainActivity.class);
             intent.putExtra("nocon", true);
             startActivity(intent);
             return;
+        }else if (password.equals("stud")){
+            Intent intent = new Intent(LoginActivity_new.this, MainActivity_stud.class);
+            startActivity(intent);
         }
+        if(!validate(email, password))
+            return;
+
+        actionProcessButton.setProgress(1);
+        actionProcessButton.setClickable(false);
+        tg_stud.setClickable(false);
+        tg_prof.setClickable(false);
+        signupLink.setClickable(false);
         if (tg_prof.isChecked()){
             AuthProffessor(jsonPlaceHolderAPI, email, password);
             isProf = true;
@@ -146,6 +156,7 @@ public class LoginActivity_new extends AppCompatActivity {
         }else {
             Intent intent = new Intent(LoginActivity_new.this, MainActivity_stud.class);
             intent.putExtra("idGroup", GroupID);
+            intent.putExtra("idStud", StudID);
             intent.putExtra("token", TOKEN);
             startActivity(intent);
         }
@@ -182,9 +193,9 @@ public class LoginActivity_new extends AppCompatActivity {
         final Student_login student_login = new Student_login(stud_login, stud_password);
 
         Call<JSONResponseStud> call = jsonPlaceHolderAPI.Authenticate_student(student_login);
-        actionProcessButton.setProgress(1);
+        /*actionProcessButton.setProgress(1);
         actionProcessButton.setClickable(false);
-        signupLink.setClickable(false);
+        signupLink.setClickable(false);*/
         call.enqueue(new Callback<JSONResponseStud>() {
             @Override
             public void onResponse(Call<JSONResponseStud> call, Response<JSONResponseStud> response) {
@@ -198,12 +209,15 @@ public class LoginActivity_new extends AppCompatActivity {
                     Student student = response.body().getStudent();
                     TOKEN = student.getToken();
                     GroupID = student.getGroup();
+                    StudID = student.getStudent_id();
                     loginContinue();
                 }else {
                     Toast.makeText(getApplicationContext(), server_message, Toast.LENGTH_LONG).show();
                 }
                 actionProcessButton.setProgress(0);
                 actionProcessButton.setClickable(true);
+                tg_stud.setClickable(true);
+                tg_prof.setClickable(true);
                 signupLink.setClickable(true);
             }
 
@@ -213,6 +227,8 @@ public class LoginActivity_new extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
                 actionProcessButton.setProgress(0);
                 actionProcessButton.setClickable(true);
+                tg_stud.setClickable(true);
+                tg_prof.setClickable(true);
                 signupLink.setClickable(true);
             }
         });
@@ -222,9 +238,9 @@ public class LoginActivity_new extends AppCompatActivity {
         final Professor professor = new Professor(prof_login, prof_password);
 
         Call<JSONResponseProf> call = jsonPlaceHolderAPI.Authenticate_professor(professor);
-        actionProcessButton.setProgress(1);
+        /*actionProcessButton.setProgress(1);
         actionProcessButton.setClickable(false);
-        signupLink.setClickable(false);
+        signupLink.setClickable(false);*/
         call.enqueue(new Callback<JSONResponseProf>() {
             @Override
             public void onResponse(Call<JSONResponseProf> call, Response<JSONResponseProf> response) {
@@ -244,6 +260,8 @@ public class LoginActivity_new extends AppCompatActivity {
                 }
                 actionProcessButton.setProgress(0);
                 actionProcessButton.setClickable(true);
+                tg_stud.setClickable(true);
+                tg_prof.setClickable(true);
                 signupLink.setClickable(true);
             }
 
@@ -253,6 +271,8 @@ public class LoginActivity_new extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
                 actionProcessButton.setProgress(0);
                 actionProcessButton.setClickable(true);
+                tg_stud.setClickable(true);
+                tg_prof.setClickable(true);
                 signupLink.setClickable(true);
             }
         });
