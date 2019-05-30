@@ -2,7 +2,7 @@ package com.example.diplim.dbModels;
 
 import com.example.diplim.dbModels.Professor_login;
 
-public class JSONResponse {
+public class JSONResponseProf {
     private Professor_login account;
     private Professor_login professor;
     private String message;

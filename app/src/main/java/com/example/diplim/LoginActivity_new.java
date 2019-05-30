@@ -9,14 +9,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.dd.processbutton.iml.ActionProcessButton;
-import com.example.diplim.dbModels.JSONResponse;
+import com.example.diplim.dbModels.JSONResponseProf;
+import com.example.diplim.dbModels.JSONResponseStud;
 import com.example.diplim.dbModels.Professor;
 import com.example.diplim.dbModels.Professor_login;
+import com.example.diplim.dbModels.Student;
+import com.example.diplim.dbModels.Student_login;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -35,13 +38,14 @@ public class LoginActivity_new extends AppCompatActivity {
 
     private String TOKEN;
     private int ProfID;
+    private int GroupID;
 
     private boolean connectionResult;
     private boolean isProf = true;
 
-    private Switch aSwitch;
     private EditText emailText, passwordText;
     private TextView signupLink;
+    private ToggleButton tg_prof, tg_stud;
     private ActionProcessButton actionProcessButton;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -73,13 +77,18 @@ public class LoginActivity_new extends AppCompatActivity {
                 login();
             }
         });
-        aSwitch.setOnClickListener(new View.OnClickListener() {
+        tg_prof.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (aSwitch.isChecked())
-                    aSwitch.setText("Студент");
-                else
-                    aSwitch.setText("Преподаватель");
+                tg_prof.setChecked(true);
+                tg_stud.setChecked(false);
+            }
+        });
+        tg_stud.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                tg_stud.setChecked(true);
+                tg_prof.setChecked(false);
             }
         });
 
@@ -98,7 +107,8 @@ public class LoginActivity_new extends AppCompatActivity {
         emailText = findViewById(R.id.input_email);
         passwordText = findViewById(R.id.input_password);
         signupLink = findViewById(R.id.link_signup);
-        aSwitch = findViewById(R.id.switch2);
+        tg_prof = findViewById(R.id.toggleButton3);
+        tg_stud = findViewById(R.id.toggleButton4);
         actionProcessButton = findViewById(R.id.btnLogin);
         actionProcessButton.setMode(ActionProcessButton.Mode.ENDLESS);
     }
@@ -114,16 +124,15 @@ public class LoginActivity_new extends AppCompatActivity {
             startActivity(intent);
             return;
         }
-        if (!aSwitch.isChecked()) {
+        if (tg_prof.isChecked()){
             AuthProffessor(jsonPlaceHolderAPI, email, password);
             isProf = true;
-        }else {
+        }else if (tg_stud.isChecked()){
+            AuthStudent(jsonPlaceHolderAPI, email, password);
             isProf = false;
-            Toast.makeText(getApplicationContext(), "Это пока не завезли", Toast.LENGTH_LONG).show();
         }
         editor.putString("Email", email);
         editor.commit();
-
     }
 
     private void loginContinue(){
@@ -136,7 +145,8 @@ public class LoginActivity_new extends AppCompatActivity {
             startActivity(intent);
         }else {
             Intent intent = new Intent(LoginActivity_new.this, MainActivity_stud.class);
-            //
+            intent.putExtra("idGroup", GroupID);
+            intent.putExtra("token", TOKEN);
             startActivity(intent);
         }
 
@@ -157,6 +167,9 @@ public class LoginActivity_new extends AppCompatActivity {
             passwordText.setError("Input valid password");
             passwordText.requestFocus();
             validInputs = false;
+        }else if (password.length()<6){
+            passwordText.setError("Не меньше 6 символов");
+            passwordText.requestFocus();
         }else {
             passwordText.setError(null);
         }
@@ -165,16 +178,56 @@ public class LoginActivity_new extends AppCompatActivity {
 
     //------------------------------AUTH-------------
 
-    private void AuthProffessor(JSONPlaceHolderAPI jsonPlaceHolderAPI, final String prof_login, String prof_password){
-        final Professor professor = new Professor(prof_login, prof_password);
+    private void AuthStudent(JSONPlaceHolderAPI jsonPlaceHolderAPI, String stud_login, String stud_password){
+        final Student_login student_login = new Student_login(stud_login, stud_password);
 
-        Call<JSONResponse> call = jsonPlaceHolderAPI.Authenticate_professor(professor);
+        Call<JSONResponseStud> call = jsonPlaceHolderAPI.Authenticate_student(student_login);
         actionProcessButton.setProgress(1);
         actionProcessButton.setClickable(false);
         signupLink.setClickable(false);
-        call.enqueue(new Callback<JSONResponse>() {
+        call.enqueue(new Callback<JSONResponseStud>() {
             @Override
-            public void onResponse(Call<JSONResponse> call, Response<JSONResponse> response) {
+            public void onResponse(Call<JSONResponseStud> call, Response<JSONResponseStud> response) {
+                if (!response.isSuccessful()){
+                    Log.e(TAG, "------Not successful response with code: "+response.code());
+                    return;
+                }
+                String server_message = response.body().getMessage();
+                Boolean server_status = response.body().getStatus();
+                if (server_status){
+                    Student student = response.body().getStudent();
+                    TOKEN = student.getToken();
+                    GroupID = student.getGroup();
+                    loginContinue();
+                }else {
+                    Toast.makeText(getApplicationContext(), server_message, Toast.LENGTH_LONG).show();
+                }
+                actionProcessButton.setProgress(0);
+                actionProcessButton.setClickable(true);
+                signupLink.setClickable(true);
+            }
+
+            @Override
+            public void onFailure(Call<JSONResponseStud> call, Throwable t) {
+                Log.e(TAG, "-------Error when connecting auth--------\n"+t.getMessage());
+                Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
+                actionProcessButton.setProgress(0);
+                actionProcessButton.setClickable(true);
+                signupLink.setClickable(true);
+            }
+        });
+    }
+
+    private void AuthProffessor(JSONPlaceHolderAPI jsonPlaceHolderAPI, String prof_login, String prof_password){
+        final Professor professor = new Professor(prof_login, prof_password);
+
+        Call<JSONResponseProf> call = jsonPlaceHolderAPI.Authenticate_professor(professor);
+        actionProcessButton.setProgress(1);
+        actionProcessButton.setClickable(false);
+        signupLink.setClickable(false);
+        call.enqueue(new Callback<JSONResponseProf>() {
+            @Override
+            public void onResponse(Call<JSONResponseProf> call, Response<JSONResponseProf> response) {
                 if (!response.isSuccessful()){
                     Log.e(TAG, "------Not successful response with code: "+response.code());
                     return;
@@ -195,7 +248,7 @@ public class LoginActivity_new extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<JSONResponse> call, Throwable t) {
+            public void onFailure(Call<JSONResponseProf> call, Throwable t) {
                 Log.e(TAG, "-------Error when connecting auth--------\n"+t.getMessage());
                 Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
                 actionProcessButton.setProgress(0);

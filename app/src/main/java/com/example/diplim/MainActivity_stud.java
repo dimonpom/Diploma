@@ -8,6 +8,7 @@ import android.widget.ListView;
 
 import com.example.diplim.CustomListViews.CAdapterSessions_stud;
 import com.example.diplim.CustomListViews.DataModel_stud;
+import com.example.diplim.dbModels.Group;
 
 import java.util.ArrayList;
 
@@ -17,12 +18,21 @@ public class MainActivity_stud extends AppCompatActivity {
     private ArrayList<DataModel_stud> classesList_stud = new ArrayList<>();
 
     private ListView listView;
+    private String TOKEN;
+    private Integer GroupID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_stud);
         initializeXML();
+
+        Bundle args = getIntent().getExtras();
+        if (args!=null){
+            GroupID = args.getInt("idGroup");
+            TOKEN = args.getString("token");
+        }
+
         classesList_stud.add(new DataModel_stud(1, "TEST", "Test Testov Testovich", "1998-05-03"));
         classesList_stud.add(new DataModel_stud(1, "TEST1", "Test Testov Testovich3", "1998-01-27"));
         classesList_stud.add(new DataModel_stud(1, "TEST2", "Test Testov Testovich1231", "1998-04-03"));
@@ -36,6 +46,8 @@ public class MainActivity_stud extends AppCompatActivity {
 
             }
         });
+
+        System.out.println(TOKEN);
     }
 
     private void initializeXML() {

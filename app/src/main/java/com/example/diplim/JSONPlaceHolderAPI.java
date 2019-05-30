@@ -2,9 +2,12 @@ package com.example.diplim;
 
 import com.example.diplim.dbModels.ClassPost;
 import com.example.diplim.dbModels.Group;
-import com.example.diplim.dbModels.JSONResponse;
+import com.example.diplim.dbModels.JSONResponseProf;
+import com.example.diplim.dbModels.JSONResponseStud;
 import com.example.diplim.dbModels.Professor;
 import com.example.diplim.dbModels.Professor_register;
+import com.example.diplim.dbModels.Student_login;
+import com.example.diplim.dbModels.Student_register;
 import com.example.diplim.dbModels.SubjectPost;
 
 import java.util.List;
@@ -54,10 +57,10 @@ public interface JSONPlaceHolderAPI {
     Call<List<Professor>> getProfessors();
 
     @POST("professor/new")
-    Call<JSONResponse> createProfessor(@Body Professor_register professor_register);
+    Call<JSONResponseProf> createProfessor(@Body Professor_register professor_register);
 
     @POST("professor/login")
-    Call<JSONResponse> Authenticate_professor(@Body Professor professor);
+    Call<JSONResponseProf> Authenticate_professor(@Body Professor professor);
     //Call<Professor_login> Authenticate_professor(@Body Professor professor);
 
     /*@PUT("professors/{id}")
@@ -65,6 +68,14 @@ public interface JSONPlaceHolderAPI {
 
     @DELETE
     Call<Void> deleteProfessors(@Path("id") int id);
+
+    //------------------Student
+
+    @POST("student/login")
+    Call<JSONResponseStud> Authenticate_student(@Body Student_login student_login);
+
+    @POST("student/new")
+    Call<JSONResponseStud> createStudent(@Body Student_register student_register);
 
     //------------------Classes
 

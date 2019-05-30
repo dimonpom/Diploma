@@ -6,25 +6,16 @@
     android:layout_height="fill_parent"
     android:fitsSystemWindows="true">
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="0dp"
-        android:layout_height="101dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
-
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:orientation="vertical"
         android:paddingLeft="24dp"
         android:paddingTop="56dp"
         android:paddingRight="24dp"
-        app:layout_constraintBottom_toTopOf="@+id/textView4"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,26 +24,95 @@
 
         <!--  Name Label -->
 
-        <RadioGroup
+        <TextView
+            android:id="@+id/textView3"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:paddingLeft="12dp"
+            android:paddingBottom="6dp"
+            android:text="Тип пользователя"
+            android:textSize="13dp" />
 
-            <RadioButton
-                android:id="@+id/rB_prof"
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/round_switch">
+
+            <RadioGroup
+                android:id="@+id/radioGroup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_weight="1"
-                android:checked="true"
-                android:text="Преподаватель" />
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-            <RadioButton
-                android:id="@+id/rB_stud"
+                <RadioButton
+                    android:id="@+id/rB_prof"
+                    android:layout_width="169dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginBottom="2dp"
+                    android:checked="true"
+                    android:text="Преподаватель"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/rB_stud"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <RadioButton
+                    android:id="@+id/rB_stud"
+                    android:layout_width="170dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:layout_marginRight="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:text="Студент"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </RadioGroup>
+
+            <Spinner
+                android:id="@+id/spinner_groups"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:gravity="center"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/radioGroup"
+                app:layout_constraintTop_toBottomOf="@+id/tv_forSpinner" />
+
+            <TextView
+                android:id="@+id/tv_forSpinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Студент" />
-        </RadioGroup>
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:gravity=""
+                android:text="Выберите группу:"
+                android:visibility="invisible"
+                app:layout_constraintEnd_toEndOf="@+id/spinner_groups"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toEndOf="@+id/radioGroup"
+                app:layout_constraintStart_toStartOf="@+id/spinner_groups"
+                app:layout_constraintTop_toTopOf="parent" />
+        </android.support.constraint.ConstraintLayout>
+
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -65,11 +125,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/custom_edit_text"
-                android:hint="Name"
                 android:drawableRight="@drawable/user"
+                android:hint="ФИО"
                 android:inputType="textCapWords"
                 android:paddingTop="@dimen/floating_hint_margin"
-                android:text="sdsdasd" />
+                android:text="Начальник завода" />
         </android.support.design.widget.TextInputLayout>
 
         <!-- Email Label -->
@@ -84,11 +144,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/custom_edit_text"
-                android:hint="Email"
                 android:drawableRight="@drawable/at"
+                android:hint="Email"
                 android:inputType="textEmailAddress"
                 android:paddingTop="@dimen/floating_hint_margin"
-                android:text="asdada@gmail.com" />
+                android:text="nachz@gmail.com" />
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Label -->
@@ -96,24 +156,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp">
+            android:layout_marginBottom="8dp">
 
             <EditText
                 android:id="@+id/input_password"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/custom_edit_text"
-                android:hint="Password"
                 android:drawableRight="@drawable/lock"
+                android:hint="Пароль"
                 android:inputType="textPassword"
                 android:paddingTop="@dimen/floating_hint_margin"
-                android:text="123123123" />
+                android:text="25435f" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp">
 
             <EditText
@@ -121,10 +181,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:background="@drawable/custom_edit_text"
-                android:hint="Password confirm"
+                android:hint="Подтверждение пароля"
                 android:inputType="textPassword"
                 android:paddingTop="@dimen/floating_hint_margin"
-                android:text="123123123" />
+                android:text="25435f" />
         </android.support.design.widget.TextInputLayout>
 
         <!-- Signup Button -->

@@ -49,28 +49,7 @@ public class API {
         return subjectList;
     }
 
-    void readGroups(JSONPlaceHolderAPI jsonPlaceHolderAPI){
 
-        Call<List<Group>> call = jsonPlaceHolderAPI.getGroups();
-        call.enqueue(new Callback<List<Group>>() {
-            @Override
-            public void onResponse(Call<List<Group>> call, Response<List<Group>> response) {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG, "------Not successful response with code: " + response.code());
-                    return;
-                }
-                List<Group> groups = response.body();
-                for (Group group : groups){
-                    System.out.println(group.getGroup_id()+" "+group.getGroup_name()+" "+group.getSubgroup());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Group>> call, Throwable t) {
-                Log.e(TAG, "-------Error when connecting--------\n"+t.getMessage());
-            }
-        });
-    }
 
     /*void readProf(JSONPlaceHolderAPI jsonPlaceHolderAPI){
         Call<List<Professor>> call = jsonPlaceHolderAPI.getProfessors();
