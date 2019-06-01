@@ -5,6 +5,7 @@ public class StudentsModel {
     String fullGroup;
 
     public StudentsModel(String fullName, String fullGroup) {
+
         this.fullName = fullName;
         this.fullGroup = fullGroup;
     }

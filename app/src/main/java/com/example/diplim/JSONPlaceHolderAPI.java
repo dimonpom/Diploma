@@ -1,11 +1,15 @@
 package com.example.diplim;
 
+import com.example.diplim.dbModels.Answer_answer;
+import com.example.diplim.dbModels.Answer_post;
 import com.example.diplim.dbModels.ClassPost;
 import com.example.diplim.dbModels.Group;
 import com.example.diplim.dbModels.JSONResponseProf;
 import com.example.diplim.dbModels.JSONResponseStud;
 import com.example.diplim.dbModels.Professor;
 import com.example.diplim.dbModels.Professor_register;
+import com.example.diplim.dbModels.Question_answer;
+import com.example.diplim.dbModels.Question_post;
 import com.example.diplim.dbModels.Student_login;
 import com.example.diplim.dbModels.Student_register;
 import com.example.diplim.dbModels.SubjectPost;
@@ -56,10 +60,10 @@ public interface JSONPlaceHolderAPI {
     @GET("professors")
     Call<List<Professor>> getProfessors();
 
-    @POST("professor/new")
+    @POST("professors/new")
     Call<JSONResponseProf> createProfessor(@Body Professor_register professor_register);
 
-    @POST("professor/login")
+    @POST("professors/login")
     Call<JSONResponseProf> Authenticate_professor(@Body Professor professor);
     //Call<Professor_login> Authenticate_professor(@Body Professor professor);
 
@@ -71,14 +75,24 @@ public interface JSONPlaceHolderAPI {
 
     //------------------Student
 
-    @POST("student/login")
+    @POST("students/login")
     Call<JSONResponseStud> Authenticate_student(@Body Student_login student_login);
 
-    @POST("student/new")
+    @POST("students/new")
     Call<JSONResponseStud> createStudent(@Body Student_register student_register);
 
     //------------------Classes
 
-    @GET("/class/professor/{professor_id}")
+    @GET("/class/professors/{professor_id}")
     Call<List<ClassPost>> getClassByProfessor(@Header("Authorization") String authKey, @Path("professor_id") int id);
+
+    //------------------Questions
+
+    @POST("questions")
+    Call<Question_answer> createQuestion(@Body Question_post question_post);
+
+    //------------------Answers
+
+    @POST("answers")
+    Call<Answer_answer> createAnswer(@Body Answer_post answer_post);
 }
