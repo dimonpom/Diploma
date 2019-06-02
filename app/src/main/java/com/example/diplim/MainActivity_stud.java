@@ -40,8 +40,8 @@ public class MainActivity_stud extends AppCompatActivity {
         }
 
         classesList_stud.add(new DataModel_stud(1, "TEST", "Test Testov Testovich", "1998-05-03"));
-        classesList_stud.add(new DataModel_stud(1, "TEST1", "Test Testov Testovich3", "1998-01-27"));
-        classesList_stud.add(new DataModel_stud(1, "TEST2", "Test Testov Testovich1231", "1998-04-03"));
+        classesList_stud.add(new DataModel_stud(2, "TEST1", "Test Testov Testovich3", "1998-01-27"));
+        classesList_stud.add(new DataModel_stud(13, "TEST2", "Test Testov Testovich1231", "1998-04-03"));
         adapter = new CAdapterSessions_stud(classesList_stud, getApplicationContext());
         listView.setAdapter(adapter);
 

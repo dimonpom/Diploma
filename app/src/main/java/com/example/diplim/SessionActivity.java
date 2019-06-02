@@ -25,6 +25,9 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.NetworkInterface;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -43,12 +46,12 @@ public class SessionActivity extends AppCompatActivity {
     ListView listView;
     final Context context = this;
     private static final String TAG="SessionActivity";
-    private int LESSON_NUMBER = 42;
     private static NetworkInterface networkInterface;
 
     private int questionID;
 
     private static CAdapterStudents adapterStudents;
+    private int LESSON_ID;
     private EditText ed_question, ed_ans1, ed_ans2, ed_ans3, ed_ans4;
     private TextView tv_subject, tv_date;
     private String exSubject, exTheme, exDate;
@@ -66,6 +69,7 @@ public class SessionActivity extends AppCompatActivity {
             exSubject = args.getString("subject");
             exTheme = args.getString("theme");
             exDate = args.getString("date");
+            LESSON_ID = 42;//args.getInt("id");
         }
 
         //setTitle(exTheme+" "+exSubject);
@@ -82,8 +86,7 @@ public class SessionActivity extends AppCompatActivity {
                 .build();
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
 
-        socketTest();
-//        System.out.println("isConnected: "+socket.connected());
+        socketConnect();
 
         tv_subject.setText(exSubject);
         tv_date.setText(exDate);
@@ -101,17 +104,16 @@ public class SessionActivity extends AppCompatActivity {
         listView.setAdapter(adapterStudents);
     }
 
-
-    private void socketTest() {
-        try {
+    private void socketConnect() {
+        try{
             IO.Options options = new IO.Options();
             options.reconnection = true;
-            options.reconnectionAttempts = 3;
+            options.reconnectionAttempts = 4;
             socket = IO.socket("http://10.0.2.2:3000", options);
             socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    System.out.println("------CONNECTED Teacher------");
+                    System.out.println("------CONNECTED as Teacher------");
                 }
 
             }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
@@ -119,22 +121,19 @@ public class SessionActivity extends AppCompatActivity {
                 public void call(Object... args) {
                     System.out.println("------DISCONNECTED------");
                 }
-            }).on("error", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.e("Server Response", args[0].toString());
-                }
             }).on("POLL_ANSWERED_NOTIFICATION", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    System.out.println("Student answered in poll");
+                    JSONObject jsonObject = (JSONObject) args[0];
+                    System.out.println("Student answered: "+jsonObject);
                 }
             });
             socket.connect();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+            socket.emit("JOIN_ROOM", LESSON_ID);
+        }catch (Exception e){
+            Log.e(TAG, "Error when connecting to socket: "+e);
         }
-        socket.emit("JOIN_ROOM", LESSON_NUMBER);
+
     }
 
     private void initializeXML() {
@@ -199,10 +198,9 @@ public class SessionActivity extends AppCompatActivity {
                     ed_ans2.requestFocus();
                 }else {
                     //Отправляем на сервер
-                    createQuestion(jsonPlaceHolderAPI, question);
-                   // StudEmul studEmul = new StudEmul();
+                    createQuestion(jsonPlaceHolderAPI, question, LESSON_ID);
+                    //--------------------
                     opened = false;
-
                 }
 
                 if (!opened){
@@ -213,7 +211,7 @@ public class SessionActivity extends AppCompatActivity {
     }
 
 
-    private void createQuestion(JSONPlaceHolderAPI jsonPlaceHolderAPI, final String question) {
+    private void createQuestion(JSONPlaceHolderAPI jsonPlaceHolderAPI, final String question, final int lessonID) {
         final Question_post question_post = new Question_post(question);
         Call<Question_answer> call = jsonPlaceHolderAPI.createQuestion(question_post);
 
@@ -225,11 +223,17 @@ public class SessionActivity extends AppCompatActivity {
                     return;
                 }
                 Question_answer question_answer = response.body();
-                questionID = question_answer.getQuestion_id();
-                socket.emit("CREATE_POLL", LESSON_NUMBER);
-
+                //questionID = question_answer.getQuestion_id();
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("lesson_number", lessonID);
+                    jsonObject.put("question_id", question_answer.getQuestion_id());
+                    jsonObject.put("question_text", question_answer.getQuestion_text());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                socket.emit("CREATE_POLL", jsonObject);
                 System.out.println("Question posted");
-                //System.out.println(question_answer.getQuestion_text());
             }
 
             @Override
@@ -240,38 +244,5 @@ public class SessionActivity extends AppCompatActivity {
 
     }
 
-    /* private void AuthProffessor(JSONPlaceHolderAPI jsonPlaceHolderAPI, String prof_login, String prof_password){
-        final Professor professor = new Professor(prof_login, prof_password);
-
-        Call<JSONResponseProf> call = jsonPlaceHolderAPI.Authenticate_professor(professor);
-
-        call.enqueue(new Callback<JSONResponseProf>() {
-        @Override
-        public void onResponse(Call<JSONResponseProf> call, Response<JSONResponseProf> response) {
-            if (!response.isSuccessful()){
-                Log.e(TAG, "------Not successful response with code: "+response.code());
-                return;
-            }
-            String server_message = response.body().getMessage();
-            Boolean server_status = response.body().getStatus();
-            if (server_status){
-                Professor_login professor_login = response.body().getProfessor();
-                TOKEN = professor_login.getToken();
-                ProfID = professor_login.getProfessor_id();
-                loginContinue();
-            }else {
-                Toast.makeText(getApplicationContext(), server_message, Toast.LENGTH_LONG).show();
-            }
-
-        }
-
-        @Override
-        public void onFailure(Call<JSONResponseProf> call, Throwable t) {
-            Log.e(TAG, "-------Error when connecting auth--------\n"+t.getMessage());
-            Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
-
-        }
-    });
-}*/
 
 }

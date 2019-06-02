@@ -16,6 +16,9 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.URISyntaxException;
 
 import retrofit2.Call;
@@ -27,7 +30,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SessionActivity_stud extends AppCompatActivity {
 
     private static final String TAG = "SessionActivity_student";
-    private int LESSON_NUMBER = 42;
+    private int LESSON_ID;
+    private int QUESTION_ID;
     private TextView tv_subject, tv_date;
     private Button presentBtn;
     private Socket socket;
@@ -45,6 +49,7 @@ public class SessionActivity_stud extends AppCompatActivity {
         if (args!=null){
             exDate = args.getString("date");
             exSubject = args.getString("subject");
+            LESSON_ID = 42;//args.getInt("id");
         }
         tv_date.setText(exDate);
         tv_subject.setText(exSubject);
@@ -59,26 +64,20 @@ public class SessionActivity_stud extends AppCompatActivity {
                 .build();
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
 
-        socketTest();
+        socketConnect();
 
         presentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 presentBtn.setVisibility(View.INVISIBLE);
                 Toast.makeText(getApplicationContext(), "Вы успели!", Toast.LENGTH_SHORT).show();
-                createAnswer(jsonPlaceHolderAPI, 20, "OTVETUSi", 65);
+                createAnswer(jsonPlaceHolderAPI, 20, "OTVETUSi", 65, LESSON_ID);
 
             }
         });
     }
 
-    private void initilizeXML() {
-        presentBtn = findViewById(R.id.btn_present);
-        tv_date = findViewById(R.id.tV_date);
-        tv_subject = findViewById(R.id.tV_subject);
-    }
-
-    private void socketTest() {
+    private void socketConnect() {
         try {
             IO.Options options = new IO.Options();
             options.reconnection = true;
@@ -95,31 +94,35 @@ public class SessionActivity_stud extends AppCompatActivity {
                 public void call(Object... args) {
                     System.out.println("------DISCONNECTED------");
                 }
-            }).on("error", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    Log.e("Server Response", args[0].toString());
-                }
             }).on("POLL_STARTED", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    System.out.println("Server Asked question");
-                }
-            }).on("POLL_STARTED", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    System.out.println("Started poll");
+                    JSONObject jsonObject = (JSONObject) args[0];
+                    String question = null;
+                    try {
+                        question = jsonObject.getString("question_text");
+                        QUESTION_ID = jsonObject.getInt("question_id");
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("Voprosiki?: "+question);
                 }
             });
             socket.connect();
+            socket.emit("JOIN_ROOM", LESSON_ID);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-
-        socket.emit("JOIN_ROOM", LESSON_NUMBER);
     }
 
-    private void createAnswer(JSONPlaceHolderAPI jsonPlaceHolderAPI, final int questionID, final String answer, int studentID){
+    private void initilizeXML() {
+        presentBtn = findViewById(R.id.btn_present);
+        tv_date = findViewById(R.id.tV_date);
+        tv_subject = findViewById(R.id.tV_subject);
+    }
+
+    private void createAnswer(JSONPlaceHolderAPI jsonPlaceHolderAPI, final int questionID, final String answer, int studentID, final int lessonID){
         final Answer_post answer_post = new Answer_post(questionID, studentID, answer);
         Call<Answer_answer> call = jsonPlaceHolderAPI.createAnswer(answer_post);
 
@@ -131,8 +134,17 @@ public class SessionActivity_stud extends AppCompatActivity {
                     return;
                 }
                 Answer_answer answer_answer = response.body();
-                System.out.println("ЕСТЬ СВЯЗЬ????"+socket.connected());
-                socket.emit("POLL_ANSWERED", LESSON_NUMBER);
+                JSONObject jsonObject = new JSONObject();
+                try{
+                    jsonObject.put("lesson_number",lessonID);
+                    jsonObject.put("answer_id", answer_answer.getAnswer_id());
+                    jsonObject.put("question_id", answer_answer.getQuestion_id());
+                    jsonObject.put("answer_text", answer_answer.getAnswer_text());
+                    jsonObject.put("student_id", answer_answer.getStudent_id());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                socket.emit("POLL_ANSWERED", jsonObject);
                 System.out.println("Answer posted");
             }
 

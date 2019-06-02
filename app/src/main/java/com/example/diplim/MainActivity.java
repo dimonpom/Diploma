@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainACtivity";
 
     private int ProfID;
-    private String TOKEN;
+    //private String TOKEN;
 
     private boolean nocon;
     private TextView date_tv;
@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeXML();
+        String TOKEN = null;
 
         Bundle args = getIntent().getExtras();
         if (args!=null){
@@ -113,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
         if (!nocon) {
             System.out.println("CONNECT EST: " + TOKEN);
-            readClassesbyProf(jsonPlaceHolderAPI, 1);
+            readClassesbyProf(jsonPlaceHolderAPI, 1, TOKEN);
         }else {
             classesList.add(new DataModel(1,"TEST","TEST1", "TEST2"));
             adapter = new CAdapterSessions(classesList, getApplicationContext());
@@ -171,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //----------------------Потягуси вниз
+        final String finalTOKEN = TOKEN;
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -179,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         //readDBRecords();
                         //subjectList = api.readSubjects(jsonPlaceHolderAPI);
-                        readClassesbyProf(jsonPlaceHolderAPI, 3);
+                        readClassesbyProf(jsonPlaceHolderAPI, 3, finalTOKEN);
                         swipeRefreshLayout.setRefreshing(false);
                     }
                 }, 2500);
@@ -297,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
         return stringBuilder.toString();
     }
 
-    private void readClassesbyProf(JSONPlaceHolderAPI jsonPlaceHolderAPI, int professor_id){
+    private void readClassesbyProf(JSONPlaceHolderAPI jsonPlaceHolderAPI, int professor_id, String TOKEN){
         System.out.println("-----------"+TOKEN);
         Call<List<ClassPost>> call = jsonPlaceHolderAPI.getClassByProfessor("Bearer "+TOKEN,professor_id);
         final ArrayList<ClassPost> list = new ArrayList<>();
@@ -307,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
                 if (!response.isSuccessful()) {
                     Log.e(TAG, "------Not successful response with code: " + response.code()
                             + "\n Response message: "+response.raw());
-
                     return;
                 }
                 List<ClassPost> classPosts = response.body();
