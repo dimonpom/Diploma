@@ -1,8 +1,10 @@
 package com.example.diplim;
 
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -32,8 +34,10 @@ public class SessionActivity_stud extends AppCompatActivity {
     private static final String TAG = "SessionActivity_student";
     private int LESSON_ID;
     private int QUESTION_ID;
+
     private TextView tv_subject, tv_date;
-    private Button presentBtn;
+    private Button presentBtn, ans_button1, ans_button2, ans_button3, ans_button4;
+
     private Socket socket;
     private JSONPlaceHolderAPI jsonPlaceHolderAPI;
 
@@ -65,6 +69,7 @@ public class SessionActivity_stud extends AppCompatActivity {
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
 
         socketConnect();
+        makeQuestionWindow(4);
 
         presentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +80,31 @@ public class SessionActivity_stud extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void makeQuestionWindow(int ans_quantity){
+        LayoutInflater layoutInflater = LayoutInflater.from(this);
+        View promptsView;
+        if (ans_quantity == 3){
+            promptsView = layoutInflater.inflate(R.layout.answer_input_form3, null);
+            ans_button1 = promptsView.findViewById(R.id.btn1);
+            ans_button2 = promptsView.findViewById(R.id.btn2);
+            ans_button3 = promptsView.findViewById(R.id.btn3);
+        }else if (ans_quantity == 4){
+            promptsView = layoutInflater.inflate(R.layout.answer_input_form4, null);
+            ans_button1 = promptsView.findViewById(R.id.btn1);
+            ans_button2 = promptsView.findViewById(R.id.btn2);
+            ans_button3 = promptsView.findViewById(R.id.btn3);
+            ans_button4 = promptsView.findViewById(R.id.btn4);
+        }else {
+            promptsView = layoutInflater.inflate(R.layout.answer_input_form, null);
+            ans_button1 = promptsView.findViewById(R.id.btn1);
+            ans_button2 = promptsView.findViewById(R.id.btn2);
+        }
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setView(promptsView);
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     private void socketConnect() {

@@ -25,9 +25,11 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.net.NetworkInterface;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -133,7 +135,6 @@ public class SessionActivity extends AppCompatActivity {
         }catch (Exception e){
             Log.e(TAG, "Error when connecting to socket: "+e);
         }
-
     }
 
     private void initializeXML() {
@@ -180,7 +181,7 @@ public class SessionActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean opened = true;
-
+                int quantity = 4;
                 String question = String.valueOf(ed_question.getText());
                 String ans1 = String.valueOf(ed_ans1.getText());
                 String ans2 = String.valueOf(ed_ans2.getText());
@@ -196,9 +197,35 @@ public class SessionActivity extends AppCompatActivity {
                 }else if (ans2.equals("")){
                     ed_ans2.setError("Two answers required");
                     ed_ans2.requestFocus();
-                }else {
+                } else {
                     //Отправляем на сервер
-                    createQuestion(jsonPlaceHolderAPI, question, LESSON_ID);
+                    ArrayList<String> answers = new ArrayList<String>();
+                    answers.add(ans1);
+                    answers.add(ans2);
+                    if (ans3.equals("") && ans4.equals("")) {
+                        quantity -= 2;
+                    }else if (ans3.equals("") || ans4.equals("")) {
+                        quantity -= 1;
+                        if (!ans3.equals(""))
+                            answers.add(ans3);
+                        else if (!ans4.equals(""))
+                            answers.add(ans4);
+                    }else {
+                        answers.add(ans3);
+                        answers.add(ans4);
+                    }
+
+                   /* JSONObject jsonObject = new JSONObject();
+                    try {
+                        jsonObject.put("lesson_number", 1);
+                        jsonObject.put("question_id", 1);
+                        jsonObject.put("question_text", "CHTO?");
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(jsonObject);*/
+                    createQuestion(jsonPlaceHolderAPI, question, LESSON_ID, answers.size(), answers);
                     //--------------------
                     opened = false;
                 }
@@ -211,7 +238,7 @@ public class SessionActivity extends AppCompatActivity {
     }
 
 
-    private void createQuestion(JSONPlaceHolderAPI jsonPlaceHolderAPI, final String question, final int lessonID) {
+    private void createQuestion(JSONPlaceHolderAPI jsonPlaceHolderAPI, final String question, final int lessonID, final int quantity, final ArrayList<String> answers) {
         final Question_post question_post = new Question_post(question);
         Call<Question_answer> call = jsonPlaceHolderAPI.createQuestion(question_post);
 
@@ -229,6 +256,12 @@ public class SessionActivity extends AppCompatActivity {
                     jsonObject.put("lesson_number", lessonID);
                     jsonObject.put("question_id", question_answer.getQuestion_id());
                     jsonObject.put("question_text", question_answer.getQuestion_text());
+                    jsonObject.put("quantity", quantity);
+                    JSONArray jsonArray = new JSONArray();
+                    for (String answer : answers)
+                        jsonArray.put(answer);
+                    jsonObject.put("answers_list", jsonArray);
+                    //jsonObject.put("")
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
