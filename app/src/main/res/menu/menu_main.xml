@@ -13,6 +13,23 @@
                 android:title="Добавить группу"/>
             <item android:id="@+id/mi_deleteGroups"
                 android:title="Удалить группу"/>
+            <item android:id="@+id/mi_updateGroups"
+                android:title="Изменить группу"/>
         </menu>
     </item>
+    <item
+        android:id="@+id/action_subjects"
+        android:orderInCategory="100"
+        android:title="Предметы"
+        app:showAsAction="never">
+        <menu>
+            <item android:id="@+id/mi_addSubjects"
+                android:title="Добавить предмет"/>
+            <item android:id="@+id/mi_deleteSubjects"
+                android:title="Удалить предмет"/>
+            <item android:id="@+id/mi_updateSubjects"
+                android:title="Изменить предмет"/>
+        </menu>
+    </item>
+
 </menu>
