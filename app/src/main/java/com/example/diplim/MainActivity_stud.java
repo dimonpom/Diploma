@@ -54,6 +54,7 @@ public class MainActivity_stud extends AppCompatActivity {
                 intent.putExtra("date", dataModel_stud.getDate());
                 intent.putExtra("subject", dataModel_stud.getSubject());
                 intent.putExtra("theme", dataModel_stud.getProfName());
+                intent.putExtra("studID", StudID);
                 startActivity(intent);
             }
         });

@@ -1,8 +1,11 @@
 package com.example.diplim;
 
+import android.app.usage.UsageEvents;
+import android.service.autofill.FillEventHistory;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.EventLog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,10 +21,12 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,13 +38,15 @@ public class SessionActivity_stud extends AppCompatActivity {
 
     private static final String TAG = "SessionActivity_student";
     private int LESSON_ID;
-    private int QUESTION_ID;
+    private int QUESTION_ID, STUDENT_ID;
 
-    private TextView tv_subject, tv_date;
+    private TextView tv_subject, tv_date, tv_question;
     private Button presentBtn, ans_button1, ans_button2, ans_button3, ans_button4;
 
     private Socket socket;
     private JSONPlaceHolderAPI jsonPlaceHolderAPI;
+
+    AlertDialog alertDialog;
 
     private String exDate, exSubject;
 
@@ -54,6 +61,7 @@ public class SessionActivity_stud extends AppCompatActivity {
             exDate = args.getString("date");
             exSubject = args.getString("subject");
             LESSON_ID = 42;//args.getInt("id");
+            STUDENT_ID = args.getInt("studID");
         }
         tv_date.setText(exDate);
         tv_subject.setText(exSubject);
@@ -69,41 +77,99 @@ public class SessionActivity_stud extends AppCompatActivity {
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
 
         socketConnect();
-        makeQuestionWindow(4);
+        /*ArrayList<String> arrayList1 = new ArrayList<String>();
+        arrayList1.add("!!!");
+        arrayList1.add("sadas");
+        arrayList1.add("1321as");
+        makeQuestionWindow("Question", 3, arrayList1);*/
 
         presentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 presentBtn.setVisibility(View.INVISIBLE);
                 Toast.makeText(getApplicationContext(), "Вы успели!", Toast.LENGTH_SHORT).show();
-                createAnswer(jsonPlaceHolderAPI, 20, "OTVETUSi", 65, LESSON_ID);
+               // createAnswer(jsonPlaceHolderAPI, 20, "OTVETUSi", 65, LESSON_ID);
 
             }
         });
     }
 
-    private void makeQuestionWindow(int ans_quantity){
+    private void makeQuestionWindow(String question, int ans_quantity, ArrayList<String> arrayList){
         LayoutInflater layoutInflater = LayoutInflater.from(this);
         View promptsView;
+        final String[] answer = new String[1];
         if (ans_quantity == 3){
             promptsView = layoutInflater.inflate(R.layout.answer_input_form3, null);
             ans_button1 = promptsView.findViewById(R.id.btn1);
+            ans_button1.setText(arrayList.get(0));
             ans_button2 = promptsView.findViewById(R.id.btn2);
+            ans_button2.setText(arrayList.get(1));
             ans_button3 = promptsView.findViewById(R.id.btn3);
+            ans_button3.setText(arrayList.get(2));
+            ans_button3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    answer[0] = (String) ans_button3.getText();
+                    createAnswer(jsonPlaceHolderAPI, QUESTION_ID, answer[0], STUDENT_ID, LESSON_ID);
+                    alertDialog.dismiss();
+                }
+            });
         }else if (ans_quantity == 4){
             promptsView = layoutInflater.inflate(R.layout.answer_input_form4, null);
             ans_button1 = promptsView.findViewById(R.id.btn1);
+            ans_button1.setText(arrayList.get(0));
             ans_button2 = promptsView.findViewById(R.id.btn2);
+            ans_button2.setText(arrayList.get(1));
             ans_button3 = promptsView.findViewById(R.id.btn3);
+            ans_button3.setText(arrayList.get(2));
+            ans_button3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    answer[0] = (String) ans_button3.getText();
+                    createAnswer(jsonPlaceHolderAPI, QUESTION_ID, answer[0], STUDENT_ID, LESSON_ID);
+                    alertDialog.dismiss();
+                }
+            });
             ans_button4 = promptsView.findViewById(R.id.btn4);
+            ans_button4.setText(arrayList.get(3));
+            ans_button4.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    answer[0] = (String) ans_button4.getText();
+                    createAnswer(jsonPlaceHolderAPI, QUESTION_ID, answer[0], STUDENT_ID, LESSON_ID);
+                    alertDialog.dismiss();
+                }
+            });
         }else {
             promptsView = layoutInflater.inflate(R.layout.answer_input_form, null);
             ans_button1 = promptsView.findViewById(R.id.btn1);
+            ans_button1.setText(arrayList.get(0));
             ans_button2 = promptsView.findViewById(R.id.btn2);
+            ans_button2.setText(arrayList.get(2));
         }
+        tv_question = promptsView.findViewById(R.id.tV_question);
+        ans_button1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                answer[0] = (String) ans_button1.getText();
+                createAnswer(jsonPlaceHolderAPI, QUESTION_ID, answer[0], STUDENT_ID, LESSON_ID);
+                alertDialog.dismiss();
+            }
+        });
+        ans_button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                answer[0] = (String) ans_button2.getText();
+                createAnswer(jsonPlaceHolderAPI, QUESTION_ID, answer[0], STUDENT_ID, LESSON_ID);
+                alertDialog.dismiss();
+            }
+        });
+
+
+        tv_question.setText(question);
         final AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setView(promptsView);
-        final AlertDialog alertDialog = builder.create();
+        alertDialog = builder.create();
         alertDialog.show();
     }
 
@@ -129,9 +195,26 @@ public class SessionActivity_stud extends AppCompatActivity {
                 public void call(Object... args) {
                     JSONObject jsonObject = (JSONObject) args[0];
                     String question = null;
+                    int ans_quntity;
                     try {
                         question = jsonObject.getString("question_text");
                         QUESTION_ID = jsonObject.getInt("question_id");
+                        ans_quntity = jsonObject.getInt("quantity");
+
+                        ArrayList<String> arrayList = new ArrayList<String>();
+                        JSONArray jsonArray = jsonObject.getJSONArray("answers_list");
+                        for (int i=0; i<jsonArray.length(); i++){
+                            arrayList.add(jsonArray.getString(i));
+                        }
+                        final String inp0 = question;
+                        final int inp1 = ans_quntity;
+                        final ArrayList<String> inp2 = arrayList;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                makeQuestionWindow(inp0, inp1, inp2);
+                            }
+                        });
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -184,4 +267,5 @@ public class SessionActivity_stud extends AppCompatActivity {
             }
         });
     }
+
 }

@@ -215,16 +215,30 @@ public class SessionActivity extends AppCompatActivity {
                         answers.add(ans4);
                     }
 
-                   /* JSONObject jsonObject = new JSONObject();
+                    /*JSONObject jsonObject = new JSONObject();
                     try {
                         jsonObject.put("lesson_number", 1);
-                        jsonObject.put("question_id", 1);
-                        jsonObject.put("question_text", "CHTO?");
+                        jsonObject.put("question_id", 2);
+                        jsonObject.put("question_text", "ЧТО??");
+                        jsonObject.put("quantity", quantity);
+                        JSONArray jsonArray = new JSONArray();
+                        for (String answer : answers)
+                            jsonArray.put(answer);
+                        jsonObject.put("answers_list", jsonArray);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    System.out.println(jsonObject);*/
+                    System.out.println(jsonObject);
+
+                    try {
+                        JSONArray jsonArray = jsonObject.getJSONArray("answers_list");//new JSONArray()//jsonObject.getJSONArray("answers_list"))
+                        for (int i=0; i<jsonArray.length(); i++){
+                            System.out.println("d--d "+jsonArray.get(i));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }*/
                     createQuestion(jsonPlaceHolderAPI, question, LESSON_ID, answers.size(), answers);
                     //--------------------
                     opened = false;
@@ -256,7 +270,7 @@ public class SessionActivity extends AppCompatActivity {
                     jsonObject.put("lesson_number", lessonID);
                     jsonObject.put("question_id", question_answer.getQuestion_id());
                     jsonObject.put("question_text", question_answer.getQuestion_text());
-                    jsonObject.put("quantity", quantity);
+                        jsonObject.put("quantity", quantity);
                     JSONArray jsonArray = new JSONArray();
                     for (String answer : answers)
                         jsonArray.put(answer);
