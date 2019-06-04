@@ -11,6 +11,8 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -25,6 +27,7 @@ import android.widget.Toast;
 import com.example.diplim.CustomListViews.CAdapterSessions;
 import com.example.diplim.dbModels.DataModel;
 import com.example.diplim.dbModels.ClassPost;
+import com.example.diplim.dbModels.Group;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -54,13 +57,17 @@ public class MainActivity extends AppCompatActivity {
     private boolean nocon;
     private TextView date_tv;
     private ImageView dateB;
-    private Spinner subjectSpinner;
-    private EditText themeEd;
+    private Spinner subjectSpinner, spinner_groups;
+    private EditText themeEd, tv_groups_add, tv_subgroups_add;
     private static CAdapterSessions adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private String TOKEN = null;
 
     private ArrayList<String> subjectList = new ArrayList<>();
     private ArrayList<DataModel> classesList = new ArrayList<>();
+    private ArrayAdapter<SpinnerWithID> groupsAdapter;
+    private List<SpinnerWithID> group_list;
+
 
     private JSONPlaceHolderAPI jsonPlaceHolderAPI;
     private final API api = new API();
@@ -89,17 +96,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeXML();
-        String TOKEN = null;
+
 
         Bundle args = getIntent().getExtras();
         if (args!=null){
             nocon = args.getBoolean("nocon");
             ProfID = args.getInt("idProf");
-            TOKEN = args.getString("token");
+            TOKEN = "Bearer "+args.getString("token");
         }
 
         Gson gson = new GsonBuilder()
@@ -120,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
             adapter = new CAdapterSessions(classesList, getApplicationContext());
             listView.setAdapter(adapter);
         }
-
+        readGroups(jsonPlaceHolderAPI);
         subjectList = api.readSubjects(jsonPlaceHolderAPI, TOKEN);
        // api.readGroups(jsonPlaceHolderAPI);
        // api.readProf(jsonPlaceHolderAPI);
@@ -130,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
         //api.putSubjects(jsonPlaceHolderAPI, 71, "Test");
         //api.createSubject(jsonPlaceHolderAPI, "Prikolchik");
         //api.createGroup(jsonPlaceHolderAPI,"404", "gg");
+
+        groupsAdapter = new ArrayAdapter<SpinnerWithID>(this, R.layout.spinner_item, group_list);
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
@@ -171,6 +186,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+
         //----------------------Потягуси вниз
         final String finalTOKEN = TOKEN;
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -194,6 +211,7 @@ public class MainActivity extends AppCompatActivity {
     private void initializeXML() {
         listView = findViewById(R.id.listview);
         swipeRefreshLayout = findViewById(R.id.activity_main_swipe_refresh_layout);
+
     }
 
     DatePickerDialog.OnDateSetListener d = new DatePickerDialog.OnDateSetListener() {
@@ -220,6 +238,72 @@ public class MainActivity extends AppCompatActivity {
                 Timecal.get(Calendar.MONTH),
                 Timecal.get(Calendar.DAY_OF_MONTH))
                 .show();
+    }
+    public void addGroup(final MenuItem item) {
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        View view = layoutInflater.inflate(R.layout.add_group_form, null);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                .setTitle("Добавление группы")
+                .setView(view)
+                .setPositiveButton("Добавить", null);
+        tv_groups_add = view.findViewById(R.id.et_group);
+        tv_subgroups_add = view.findViewById(R.id.et_subgroup);
+        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean opened = true;
+                String group = String.valueOf(tv_groups_add.getText());
+                String subgroup = String.valueOf(tv_subgroups_add.getText());
+                if (group.equals("")){
+                    tv_groups_add.setError("Поле не может быть пустым");
+                }if (subgroup.equals("")){
+                    tv_subgroups_add.setError("Поле не может быть пустым");
+                }else {
+                    opened = false;
+                }
+
+                if (!opened){
+                    alertDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    public void deleteGroup(MenuItem item) {
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        View view = layoutInflater.inflate(R.layout.delet_group_form, null);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                .setTitle("Удаление группы")
+                .setView(view);
+        spinner_groups = view.findViewById(R.id.spinner_groups);
+
+        spinner_groups.setAdapter(groupsAdapter);
+
+        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setPositiveButton("Удалить", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SpinnerWithID spinnerWithID = (SpinnerWithID) spinner_groups.getSelectedItem();
+                //System.out.println(spinnerWithID.group_id);
+                deleteGroup(jsonPlaceHolderAPI, spinnerWithID.group_id, TOKEN);
+
+            }
+        });
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
     }
 
     public void Add_Action(View view) {
@@ -262,7 +346,7 @@ public class MainActivity extends AppCompatActivity {
                 String date = RqYear+"/"+RqMonth+"/"+RqDay;
 
                 if (theme.equals("")) {
-                    themeEd.setError("Обязаельное поле");
+                    themeEd.setError("Обязательное поле");
                     themeEd.requestFocus();
                 }else {
                     //Отправляем на сервер
@@ -301,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void readClassesbyProf(JSONPlaceHolderAPI jsonPlaceHolderAPI, int professor_id, String TOKEN){
         System.out.println("-----------"+TOKEN);
-        Call<List<ClassPost>> call = jsonPlaceHolderAPI.getClassByProfessor("Bearer "+TOKEN,professor_id);
+        Call<List<ClassPost>> call = jsonPlaceHolderAPI.getClassByProfessor(TOKEN,professor_id);
         final ArrayList<ClassPost> list = new ArrayList<>();
         call.enqueue(new Callback<List<ClassPost>>() {
             @Override
@@ -331,6 +415,27 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    void deleteGroup(JSONPlaceHolderAPI jsonPlaceHolderAPI, int groupID, String Token){
+        Call<Void> call = jsonPlaceHolderAPI.deleteGroup(Token,groupID);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()){
+                    Log.e(TAG, "------Not successful response with code: " + response.code()
+                            + "\n Response message: "+response.raw());
+                    return;
+                }
+                Toast.makeText(getApplicationContext(), "Успешно удалено", Toast.LENGTH_SHORT).show();
+                group_list.remove(spinner_groups.getSelectedItem());
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private ArrayList<DataModel> convertTask(ArrayList<ClassPost> classPosts){
         ArrayList<DataModel> data = new ArrayList<>();
         if (classPosts.size()>0){
@@ -346,4 +451,32 @@ public class MainActivity extends AppCompatActivity {
         }
         return data;
     }
+
+
+
+    private void readGroups(JSONPlaceHolderAPI jsonPlaceHolderAPI){
+        group_list = new ArrayList<SpinnerWithID>();
+        Call<List<Group>> call = jsonPlaceHolderAPI.getGroups();
+        call.enqueue(new Callback<List<Group>>() {
+            @Override
+            public void onResponse(Call<List<Group>> call, Response<List<Group>> response) {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, "------Not successful response with code: " + response.code());
+                    return;
+                }
+                List<Group> groups = response.body();
+                for (Group group : groups){
+                    group_list.add(new SpinnerWithID(group.getGroup_name()+" "+group.getSubgroup(), group.getGroup_id()));
+                }
+                groupsAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<List<Group>> call, Throwable t) {
+                Log.e(TAG, "-------Error when connecting--------\n"+t.getMessage());
+            }
+        });
+    }
+
+
 }

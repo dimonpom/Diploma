@@ -10,9 +10,11 @@
         app:showAsAction="never">
         <menu>
             <item android:id="@+id/mi_addGroups"
-                android:title="Добавить группу"/>
+                android:title="Добавить группу"
+                android:onClick="addGroup"/>
             <item android:id="@+id/mi_deleteGroups"
-                android:title="Удалить группу"/>
+                android:title="Удалить группу"
+                android:onClick="deleteGroup"/>
             <item android:id="@+id/mi_updateGroups"
                 android:title="Изменить группу"/>
         </menu>
@@ -31,5 +33,4 @@
                 android:title="Изменить предмет"/>
         </menu>
     </item>
-
 </menu>

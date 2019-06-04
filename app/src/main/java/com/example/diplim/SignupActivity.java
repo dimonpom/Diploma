@@ -281,8 +281,6 @@ public class SignupActivity extends AppCompatActivity {
                 Log.e(TAG, "-------Error when connecting--------\n"+t.getMessage());
             }
         });
-
-
     }
 
     public boolean validate(String name, String email, String password, String passwordConfirm) {

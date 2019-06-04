@@ -145,7 +145,7 @@ public class SessionActivity_stud extends AppCompatActivity {
             ans_button1 = promptsView.findViewById(R.id.btn1);
             ans_button1.setText(arrayList.get(0));
             ans_button2 = promptsView.findViewById(R.id.btn2);
-            ans_button2.setText(arrayList.get(2));
+            ans_button2.setText(arrayList.get(1));
         }
         tv_question = promptsView.findViewById(R.id.tV_question);
         ans_button1.setOnClickListener(new View.OnClickListener() {
@@ -168,7 +168,8 @@ public class SessionActivity_stud extends AppCompatActivity {
 
         tv_question.setText(question);
         final AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setView(promptsView);
+                .setView(promptsView)
+                .setCancelable(false);
         alertDialog = builder.create();
         alertDialog.show();
     }

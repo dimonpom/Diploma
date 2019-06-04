@@ -1,5 +1,6 @@
 package com.example.diplim;
 
+import android.media.session.MediaSession;
 import android.util.Log;
 
 import com.example.diplim.dbModels.Group;
@@ -180,18 +181,5 @@ public class API {
         });
     }
 
-    void deleteGroup(JSONPlaceHolderAPI jsonPlaceHolderAPI, int groupID){
-        Call<Void> call = jsonPlaceHolderAPI.deleteGroup(groupID);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Log.i(TAG, "Code: "+response.code());
-            }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Log.e(TAG, "-------2Error when connecting--------\n"+t.getMessage());
-            }
-        });
-    }
 }

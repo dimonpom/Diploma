@@ -53,7 +53,7 @@ public interface JSONPlaceHolderAPI {
     Call<Void> putGroup(@Path("id") int id, @Body Group group);
 
     @DELETE("groups/{id}")
-    Call<Void> deleteGroup(@Path("id") int id);
+    Call<Void> deleteGroup(@Header("Authorization") String authKey, @Path("id") int id);
 
     //------------------Professors
 

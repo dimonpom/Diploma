@@ -3,7 +3,10 @@ package com.example.diplim;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +28,8 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.eazegraph.lib.charts.PieChart;
+import org.eazegraph.lib.models.PieModel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +40,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,20 +52,22 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class SessionActivity extends AppCompatActivity {
 
     ArrayList<StudentsModel> studentsModels;
-    ListView listView;
+
     final Context context = this;
     private static final String TAG="SessionActivity";
-    private static NetworkInterface networkInterface;
 
     private int questionID;
-
-    private static CAdapterStudents adapterStudents;
     private int LESSON_ID;
+
     private EditText ed_question, ed_ans1, ed_ans2, ed_ans3, ed_ans4;
     private TextView tv_subject, tv_date;
-    private String exSubject, exTheme, exDate;
-    private Socket socket;
+    private ListView listView;
+    private PieChart pieChart;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
+    private String exSubject, exTheme, exDate;
+    private static CAdapterStudents adapterStudents;
+    private Socket socket;
     private JSONPlaceHolderAPI jsonPlaceHolderAPI;
 
     @Override
@@ -74,8 +83,6 @@ public class SessionActivity extends AppCompatActivity {
             LESSON_ID = 42;//args.getInt("id");
         }
 
-        //setTitle(exTheme+" "+exSubject);
-        //menu.findItem(R.id.menu_date).setTitle("Exple");
         initializeXML();
 
         Gson gson = new GsonBuilder()
@@ -101,9 +108,50 @@ public class SessionActivity extends AppCompatActivity {
         studentsModels.add(new StudentsModel("Журавлёв Тимур Улебович","321 А"));
         studentsModels.add(new StudentsModel("Кулагин Бенедикт Юлианович","321 А"));
         studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
+        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
+        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
+        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
+        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
+        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
+
+
 
         adapterStudents = new CAdapterStudents(studentsModels, getApplicationContext());
         listView.setAdapter(adapterStudents);
+        updateGraph();
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                pieChart.update();
+                //swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+    }
+    private Map<String, Integer> answerMap = new HashMap<String, Integer>();
+
+    private void updateGraph(){
+        pieChart.clearChart();
+        final ArrayList<String> color = new ArrayList<>();
+        color.add("#4EB0E0");
+        color.add("#5D6DE5");
+        color.add("#49E78D");
+        color.add("#FFAE50");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int i=0;
+                for (Map.Entry entry : answerMap.entrySet()){
+                    if (i<=3) {
+                        pieChart.addPieSlice(new PieModel(entry.getKey().toString(), Integer.parseInt(entry.getValue().toString()), Color.parseColor(color.get(i))));
+                        System.out.println("Prohod: " + entry.getKey() + " " + entry.getValue());
+                        i++;
+                    }
+                }
+                pieChart.update();
+            }
+        });
+
     }
 
     private void socketConnect() {
@@ -127,7 +175,19 @@ public class SessionActivity extends AppCompatActivity {
                 @Override
                 public void call(Object... args) {
                     JSONObject jsonObject = (JSONObject) args[0];
-                    System.out.println("Student answered: "+jsonObject);
+                    try {
+                        String ans = jsonObject.getString("answer_text");
+                        Integer val = answerMap.get(ans);
+                        System.out.println("Text: "+ans+" Value: "+val);
+                        if (val !=null) {
+                            answerMap.put(ans, val+1);
+                            System.out.println("Add to map value: "+val);
+                        }else
+                            answerMap.put(ans, 1);
+                        updateGraph();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             socket.connect();
@@ -140,6 +200,8 @@ public class SessionActivity extends AppCompatActivity {
     private void initializeXML() {
         tv_subject = findViewById(R.id.tV_subject);
         tv_date = findViewById(R.id.tV_date);
+        pieChart = findViewById(R.id.pieChart);
+        swipeRefreshLayout = findViewById(R.id.act);
     }
 
     private String convertDate(String date){
@@ -150,6 +212,7 @@ public class SessionActivity extends AppCompatActivity {
     }
 
     public void AddQuestion(View view){
+        answerMap.clear();
         LayoutInflater layoutInflater = LayoutInflater.from(context);
         View promptsView = layoutInflater.inflate(R.layout.question_input_form, null);
 
@@ -176,6 +239,8 @@ public class SessionActivity extends AppCompatActivity {
 
         final AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#2D95CA"));
+        alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#2D95CA"));
 
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
