@@ -3,9 +3,11 @@ package com.example.diplim;
 import com.example.diplim.dbModels.Answer_answer;
 import com.example.diplim.dbModels.Answer_post;
 import com.example.diplim.dbModels.ClassPost;
+import com.example.diplim.dbModels.ClassStud_get;
 import com.example.diplim.dbModels.Group;
 import com.example.diplim.dbModels.JSONResponseProf;
 import com.example.diplim.dbModels.JSONResponseStud;
+import com.example.diplim.dbModels.Presence_post;
 import com.example.diplim.dbModels.Professor;
 import com.example.diplim.dbModels.Professor_register;
 import com.example.diplim.dbModels.Question_answer;
@@ -83,16 +85,20 @@ public interface JSONPlaceHolderAPI {
 
     //------------------Classes
 
-    @GET("/class/professors/{professor_id}")
+    @GET("classes/students/{student_id}")
+    Call<List<ClassStud_get>> getClassByStudent(@Header("Authorization") String authKey, @Path("student_id") int id);
+
+    @GET("classes/professors/{professor_id}")
     Call<List<ClassPost>> getClassByProfessor(@Header("Authorization") String authKey, @Path("professor_id") int id);
 
-    //------------------Questions
+    //------------------Socket-based
 
     @POST("questions")
     Call<Question_answer> createQuestion(@Body Question_post question_post);
 
-    //------------------Answers
-
     @POST("answers")
     Call<Answer_answer> createAnswer(@Body Answer_post answer_post);
+
+    @POST("presences")
+    Call<Void> createPresence(@Body Presence_post presence_post);
 }

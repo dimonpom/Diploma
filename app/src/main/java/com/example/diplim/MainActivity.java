@@ -186,8 +186,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         //----------------------Потягуси вниз
         final String finalTOKEN = TOKEN;
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -360,27 +358,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    public String convertStreamToString(InputStream inputStream){
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuilder stringBuilder = new StringBuilder();
-
-        String line;
-        try {
-            while ((line = reader.readLine()) != null)
-                stringBuilder.append(line).append("\n");
-        } catch (IOException e){
-            System.out.println("-----------Converting Error------");
-            e.printStackTrace();
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return stringBuilder.toString();
     }
 
     private void readClassesbyProf(JSONPlaceHolderAPI jsonPlaceHolderAPI, int professor_id, String TOKEN){

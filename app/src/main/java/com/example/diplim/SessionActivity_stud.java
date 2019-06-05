@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.diplim.dbModels.Answer_answer;
 import com.example.diplim.dbModels.Answer_post;
+import com.example.diplim.dbModels.Presence_post;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
@@ -76,20 +77,38 @@ public class SessionActivity_stud extends AppCompatActivity {
                 .build();
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
 
-        socketConnect();
-        /*ArrayList<String> arrayList1 = new ArrayList<String>();
-        arrayList1.add("!!!");
-        arrayList1.add("sadas");
-        arrayList1.add("1321as");
-        makeQuestionWindow("Question", 3, arrayList1);*/
+        //socketConnect();
+        //studentPresent(jsonPlaceHolderAPI, STUDENT_ID, LESSON_ID);
 
         presentBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 presentBtn.setVisibility(View.INVISIBLE);
-                Toast.makeText(getApplicationContext(), "Вы успели!", Toast.LENGTH_SHORT).show();
+                studentPresent(jsonPlaceHolderAPI, STUDENT_ID, LESSON_ID);
                // createAnswer(jsonPlaceHolderAPI, 20, "OTVETUSi", 65, LESSON_ID);
 
+            }
+        });
+    }
+
+    private void studentPresent(JSONPlaceHolderAPI jsonPlaceHolderAPI, int studID, int classID){
+        Presence_post presence_post = new Presence_post(studID, classID);
+        Call<Void> call = jsonPlaceHolderAPI.createPresence(presence_post);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()){
+                    Log.e(TAG, "Error, with response code: "+response.code()+"\n"+response.message());
+                    return;
+                }
+                Toast.makeText(getApplicationContext(), "Вы успешно зачислены на занятие", Toast.LENGTH_LONG).show();
+
+                socketConnect();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "-------Error when connecting--------\n"+t.getMessage());
             }
         });
     }

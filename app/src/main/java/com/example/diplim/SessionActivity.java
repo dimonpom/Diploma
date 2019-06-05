@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.diplim.CustomListViews.CAdapterStudents;
 import com.example.diplim.dbModels.Answer_answer;
@@ -118,13 +119,13 @@ public class SessionActivity extends AppCompatActivity {
 
         adapterStudents = new CAdapterStudents(studentsModels, getApplicationContext());
         listView.setAdapter(adapterStudents);
-        updateGraph();
+       // updateGraph();
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 pieChart.update();
-                //swipeRefreshLayout.setRefreshing(false);
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
     }
@@ -279,31 +280,6 @@ public class SessionActivity extends AppCompatActivity {
                         answers.add(ans3);
                         answers.add(ans4);
                     }
-
-                    /*JSONObject jsonObject = new JSONObject();
-                    try {
-                        jsonObject.put("lesson_number", 1);
-                        jsonObject.put("question_id", 2);
-                        jsonObject.put("question_text", "ЧТО??");
-                        jsonObject.put("quantity", quantity);
-                        JSONArray jsonArray = new JSONArray();
-                        for (String answer : answers)
-                            jsonArray.put(answer);
-                        jsonObject.put("answers_list", jsonArray);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println(jsonObject);
-
-                    try {
-                        JSONArray jsonArray = jsonObject.getJSONArray("answers_list");//new JSONArray()//jsonObject.getJSONArray("answers_list"))
-                        for (int i=0; i<jsonArray.length(); i++){
-                            System.out.println("d--d "+jsonArray.get(i));
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }*/
                     createQuestion(jsonPlaceHolderAPI, question, LESSON_ID, answers.size(), answers);
                     //--------------------
                     opened = false;
@@ -351,6 +327,7 @@ public class SessionActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Question_answer> call, Throwable t) {
                 Log.e(TAG, "-------Error when connecting auth--------\n"+t.getMessage());
+                Toast.makeText(getApplicationContext(), "Ошибка подключения к серверу", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -27,13 +27,13 @@ public class API {
     //--------------------------------------------------------READ---------------------------------------------
 
     ArrayList<String> readSubjects(JSONPlaceHolderAPI jsonPlaceHolderAPI, String Token){
-        Call<List<SubjectPost>> call = jsonPlaceHolderAPI.getSubjects("Bearer "+Token);
+        Call<List<SubjectPost>> call = jsonPlaceHolderAPI.getSubjects(Token);
         final ArrayList<String> subjectList = new ArrayList<>();
         call.enqueue(new Callback<List<SubjectPost>>() {
             @Override
             public void onResponse(Call<List<SubjectPost>> call, Response<List<SubjectPost>> response) {
                 if (!response.isSuccessful()) {
-                    Log.e(TAG, "------Not successful response with code: " + response.code());
+                    Log.e(TAG, "------Not successful response with code: " + response.raw());
                     return;
                 }
                 List<SubjectPost> posts = response.body();

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -197,10 +198,29 @@ public class LoginActivity_new extends Activity {
         }else if (password.length()<6){
             passwordText.setError("Не меньше 6 символов");
             passwordText.requestFocus();
+            validInputs = false;
         }else {
             passwordText.setError(null);
         }
         return validInputs;
+    }
+
+    boolean twice;
+    @Override
+    public void onBackPressed() {
+        if (twice){
+            System.exit(0);
+            finish();
+        }
+
+        Toast.makeText(getApplicationContext(), "Нажмите назад еще раз, чтобы выйти", Toast.LENGTH_SHORT).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                twice = false;
+            }
+        }, 3000);
+        twice = true;
     }
 
     //------------------------------AUTH-------------
@@ -209,9 +229,6 @@ public class LoginActivity_new extends Activity {
         final Student_login student_login = new Student_login(stud_login, stud_password);
 
         Call<JSONResponseStud> call = jsonPlaceHolderAPI.Authenticate_student(student_login);
-        /*actionProcessButton.setProgress(1);
-        actionProcessButton.setClickable(false);
-        signupLink.setClickable(false);*/
         call.enqueue(new Callback<JSONResponseStud>() {
             @Override
             public void onResponse(Call<JSONResponseStud> call, Response<JSONResponseStud> response) {

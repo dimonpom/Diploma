@@ -6,18 +6,30 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.diplim.CustomListViews.CAdapterSessions_stud;
+import com.example.diplim.dbModels.ClassStud_get;
 import com.example.diplim.dbModels.DataModel_stud;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity_stud extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity_stud ";
     private static CAdapterSessions_stud adapter;
     private ArrayList<DataModel_stud> classesList_stud = new ArrayList<>();
 
@@ -25,6 +37,7 @@ public class MainActivity_stud extends AppCompatActivity {
     private String TOKEN;
     private Integer GroupID;
     private int StudID;
+    private JSONPlaceHolderAPI jsonPlaceHolderAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,15 +48,25 @@ public class MainActivity_stud extends AppCompatActivity {
         Bundle args = getIntent().getExtras();
         if (args!=null){
             GroupID = args.getInt("idGroup");
-            TOKEN = args.getString("token");
+            TOKEN = "Bearer "+args.getString("token");
             StudID = args.getInt("idStud");
         }
 
-        classesList_stud.add(new DataModel_stud(1, "TEST", "Test Testov Testovich", "1998-05-03"));
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://10.0.2.2:8080/")
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
+
+        /*classesList_stud.add(new DataModel_stud(1, "TEST", "Test Testov Testovich", "1998-05-03"));
         classesList_stud.add(new DataModel_stud(2, "TEST1", "Test Testov Testovich3", "1998-01-27"));
-        classesList_stud.add(new DataModel_stud(13, "TEST2", "Test Testov Testovich1231", "1998-04-03"));
-        adapter = new CAdapterSessions_stud(classesList_stud, getApplicationContext());
-        listView.setAdapter(adapter);
+        classesList_stud.add(new DataModel_stud(13, "TEST2", "Test Testov Testovich1231", "1998-04-03"));*/
+        readClassesByStud(jsonPlaceHolderAPI, StudID, TOKEN);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -109,5 +132,36 @@ public class MainActivity_stud extends AppCompatActivity {
 
     private void initializeXML() {
         listView = findViewById(R.id.listview);
+    }
+
+    private void readClassesByStud(JSONPlaceHolderAPI jsonPlaceHolderAPI,int student_id, String TOKEN){
+        Call<List<ClassStud_get>> call = jsonPlaceHolderAPI.getClassByStudent(TOKEN, student_id);
+        call.enqueue(new Callback<List<ClassStud_get>>() {
+            @Override
+            public void onResponse(Call<List<ClassStud_get>> call, Response<List<ClassStud_get>> response) {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, "------Not successful response with code: " + response.code()
+                            + "\n Response message: "+response.raw());
+                    return;
+                }
+                List<ClassStud_get> classStud_gets = response.body();
+                for (ClassStud_get classStud_get : classStud_gets){
+                    String[] strings = classStud_get.getClass_date().split("T");
+                    String classDate = strings[0];
+                    classesList_stud.add(new DataModel_stud(
+                            classStud_get.getClass_id(), classStud_get.getSubject(),
+                            classStud_get.getProfessor(), classDate
+                    ));
+                }
+                adapter = new CAdapterSessions_stud(classesList_stud, getApplicationContext());
+                listView.setAdapter(adapter);
+            }
+
+            @Override
+            public void onFailure(Call<List<ClassStud_get>> call, Throwable t) {
+                Log.e(TAG, "-------Error when connecting--------\n"+t.getMessage());
+            }
+        });
+
     }
 }
