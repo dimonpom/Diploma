@@ -61,7 +61,7 @@ public class SessionActivity extends AppCompatActivity {
     private int LESSON_ID;
 
     private EditText ed_question, ed_ans1, ed_ans2, ed_ans3, ed_ans4;
-    private TextView tv_subject, tv_date;
+    private TextView tv_subject, tv_date, tv_question_asked;
     private ListView listView;
     private PieChart pieChart;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -70,11 +70,16 @@ public class SessionActivity extends AppCompatActivity {
     private static CAdapterStudents adapterStudents;
     private Socket socket;
     private JSONPlaceHolderAPI jsonPlaceHolderAPI;
+    final ArrayList<String> color = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session);
+        color.add("#4EB0E0");
+        color.add("#5D6DE5");
+        color.add("#49E78D");
+        color.add("#FFAE50");
 
         Bundle args = getIntent().getExtras();
         if (args!=null){
@@ -109,13 +114,22 @@ public class SessionActivity extends AppCompatActivity {
         studentsModels.add(new StudentsModel("Журавлёв Тимур Улебович","321 А"));
         studentsModels.add(new StudentsModel("Кулагин Бенедикт Юлианович","321 А"));
         studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
-        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
-        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
-        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
-        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
-        studentsModels.add(new StudentsModel("Красильников Пантелеймон Эльдарович","321 А"));
+        studentsModels.add(new StudentsModel("Ткаченко Жерар Владимирович","321 Б"));
+        studentsModels.add(new StudentsModel("Крылов Юрий Валерьевич","321 Б"));
+        studentsModels.add(new StudentsModel("Поляков Роберт Алексеевич","321 Б"));
+        studentsModels.add(new StudentsModel("Яловой Владлен Григорьевич","321 А"));
+        studentsModels.add(new StudentsModel("Воронцов Ленар Анатолиевич","321 А"));
+        studentsModels.add(new StudentsModel("Савин Иван Васильевич","321 А"));
+        studentsModels.add(new StudentsModel("Осипов Матвей Сергеевич","321 Б"));
+        studentsModels.add(new StudentsModel("Пилипейко Донат Владимирович","321 А"));
+        studentsModels.add(new StudentsModel("Стегайло Гордей Анатолиевич","321 А"));
+        studentsModels.add(new StudentsModel("Селезнёв Пётр Романович","321 Б"));
 
-
+        pieChart.addPieSlice(new PieModel("Понравилось", 20, Color.parseColor(color.get(1))));
+        pieChart.addPieSlice(new PieModel("Скорее понравилось", 12, Color.parseColor(color.get(2))));
+        pieChart.addPieSlice(new PieModel("Больше не понравилось, чем понравилось", 3, Color.parseColor(color.get(3))));
+        pieChart.addPieSlice(new PieModel("Не понравилось", 6, Color.parseColor(color.get(0))));
+        tv_question_asked.setText("Понравилось ли вам занятие?");
 
         adapterStudents = new CAdapterStudents(studentsModels, getApplicationContext());
         listView.setAdapter(adapterStudents);
@@ -133,11 +147,7 @@ public class SessionActivity extends AppCompatActivity {
 
     private void updateGraph(){
         pieChart.clearChart();
-        final ArrayList<String> color = new ArrayList<>();
-        color.add("#4EB0E0");
-        color.add("#5D6DE5");
-        color.add("#49E78D");
-        color.add("#FFAE50");
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -203,6 +213,7 @@ public class SessionActivity extends AppCompatActivity {
         tv_date = findViewById(R.id.tV_date);
         pieChart = findViewById(R.id.pieChart);
         swipeRefreshLayout = findViewById(R.id.act);
+        tv_question_asked = findViewById(R.id.tv_question_asked);
     }
 
     private String convertDate(String date){
@@ -247,7 +258,6 @@ public class SessionActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 boolean opened = true;
-                int quantity = 4;
                 String question = String.valueOf(ed_question.getText());
                 String ans1 = String.valueOf(ed_ans1.getText());
                 String ans2 = String.valueOf(ed_ans2.getText());
@@ -269,9 +279,7 @@ public class SessionActivity extends AppCompatActivity {
                     answers.add(ans1);
                     answers.add(ans2);
                     if (ans3.equals("") && ans4.equals("")) {
-                        quantity -= 2;
                     }else if (ans3.equals("") || ans4.equals("")) {
-                        quantity -= 1;
                         if (!ans3.equals(""))
                             answers.add(ans3);
                         else if (!ans4.equals(""))
@@ -305,7 +313,7 @@ public class SessionActivity extends AppCompatActivity {
                     return;
                 }
                 Question_answer question_answer = response.body();
-                //questionID = question_answer.getQuestion_id();
+                tv_question_asked.setText(question);
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put("lesson_number", lessonID);

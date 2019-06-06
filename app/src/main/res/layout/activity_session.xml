@@ -61,7 +61,7 @@
         android:layout_height="2dp"
         android:layout_marginBottom="4dp"
         android:background="?android:attr/listDivider"
-        app:layout_constraintBottom_toTopOf="@+id/textView4"
+        app:layout_constraintBottom_toTopOf="@+id/tv_question_asked"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
@@ -106,6 +106,7 @@
         android:layout_width="410dp"
         android:layout_height="230dp"
         android:visibility="visible"
+        app:egEmptyDataText=""
         app:egLegendTextSize="18dp"
         app:egValueTextSize="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -116,7 +117,7 @@
     </org.eazegraph.lib.charts.PieChart>
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/tv_question_asked"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -128,4 +129,5 @@
         app:layout_constraintBottom_toTopOf="@+id/pieChart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
 </android.support.constraint.ConstraintLayout>
