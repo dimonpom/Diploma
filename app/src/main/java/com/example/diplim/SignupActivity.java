@@ -19,6 +19,7 @@ import com.example.diplim.dbModels.JSONResponseProf;
 import com.example.diplim.dbModels.JSONResponseStud;
 import com.example.diplim.dbModels.Professor_login;
 import com.example.diplim.dbModels.Professor_register;
+import com.example.diplim.dbModels.SpinnerWithID;
 import com.example.diplim.dbModels.Student;
 import com.example.diplim.dbModels.Student_register;
 import com.google.gson.Gson;
@@ -211,7 +212,7 @@ public class SignupActivity extends AppCompatActivity {
                 rbStud.setClickable(true);
                 signupButton.setProgress(0);
                 Log.e(TAG, "-------Error when connecting register--------\n"+t.getMessage());
-                Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Ошибка подключения", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -255,7 +256,7 @@ public class SignupActivity extends AppCompatActivity {
                 rbStud.setClickable(true);
                 signupButton.setProgress(0);
                 Log.e(TAG, "-------Error when connecting register--------\n"+t.getMessage());
-                Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Ошибка подключения", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -184,7 +184,6 @@ public class SessionActivity_stud extends AppCompatActivity {
             }
         });
 
-
         tv_question.setText(question);
         final AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setView(promptsView)
@@ -239,7 +238,6 @@ public class SessionActivity_stud extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    System.out.println("Voprosiki?: "+question);
                 }
             });
             socket.connect();
@@ -278,7 +276,7 @@ public class SessionActivity_stud extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 socket.emit("POLL_ANSWERED", jsonObject);
-                System.out.println("Answer posted");
+                Toast.makeText(getApplicationContext(), "Вы успешно ответили", Toast.LENGTH_SHORT).show();
             }
 
             @Override

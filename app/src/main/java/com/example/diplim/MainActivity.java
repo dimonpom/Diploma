@@ -28,13 +28,10 @@ import com.example.diplim.CustomListViews.CAdapterSessions;
 import com.example.diplim.dbModels.DataModel;
 import com.example.diplim.dbModels.ClassPost;
 import com.example.diplim.dbModels.Group;
+import com.example.diplim.dbModels.SpinnerWithID;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -52,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainACtivity";
 
     private int ProfID;
-    //private String TOKEN;
 
     private boolean nocon;
     private TextView date_tv;
@@ -126,23 +122,15 @@ public class MainActivity extends AppCompatActivity {
 
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
         if (!nocon) {
-            System.out.println("CONNECT EST: " + TOKEN);
             readClassesbyProf(jsonPlaceHolderAPI, 1, TOKEN);
         }else {
-            classesList.add(new DataModel(1,"TEST","TEST1", "TEST2"));
+            classesList.add(new DataModel(1,"Предмет","Тема", "10-03-1998"));
+            classesList.add(new DataModel(1,"Предмет2","Тема2", "12-04-1998"));
             adapter = new CAdapterSessions(classesList, getApplicationContext());
             listView.setAdapter(adapter);
         }
         readGroups(jsonPlaceHolderAPI);
         subjectList = api.readSubjects(jsonPlaceHolderAPI, TOKEN);
-       // api.readGroups(jsonPlaceHolderAPI);
-       // api.readProf(jsonPlaceHolderAPI);
-        //api.deleteGroup(jsonPlaceHolderAPI, 22);
-        //api.deleteSubject(jsonPlaceHolderAPI,71);
-        //api.putGroups(jsonPlaceHolderAPI, 22, "505", "Tf");
-        //api.putSubjects(jsonPlaceHolderAPI, 71, "Test");
-        //api.createSubject(jsonPlaceHolderAPI, "Prikolchik");
-        //api.createGroup(jsonPlaceHolderAPI,"404", "gg");
 
         groupsAdapter = new ArrayAdapter<SpinnerWithID>(this, R.layout.spinner_item, group_list);
 
@@ -194,22 +182,17 @@ public class MainActivity extends AppCompatActivity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        //readDBRecords();
-                        //subjectList = api.readSubjects(jsonPlaceHolderAPI);
-                        readClassesbyProf(jsonPlaceHolderAPI, 3, finalTOKEN);
+                        readClassesbyProf(jsonPlaceHolderAPI, 1, finalTOKEN);
                         swipeRefreshLayout.setRefreshing(false);
                     }
                 }, 2500);
             }
         });
-
-
     }
 
     private void initializeXML() {
         listView = findViewById(R.id.listview);
         swipeRefreshLayout = findViewById(R.id.activity_main_swipe_refresh_layout);
-
     }
 
     DatePickerDialog.OnDateSetListener d = new DatePickerDialog.OnDateSetListener() {
@@ -295,9 +278,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 SpinnerWithID spinnerWithID = (SpinnerWithID) spinner_groups.getSelectedItem();
-                //System.out.println(spinnerWithID.group_id);
                 deleteGroup(jsonPlaceHolderAPI, spinnerWithID.group_id, TOKEN);
-
             }
         });
         final AlertDialog alertDialog = builder.create();
@@ -349,7 +330,6 @@ public class MainActivity extends AppCompatActivity {
                 }else {
                     //Отправляем на сервер
 
-
                     opened = false;
                 }
 
@@ -375,12 +355,12 @@ public class MainActivity extends AppCompatActivity {
                 List<ClassPost> classPosts = response.body();
 
                 for (ClassPost classPost : classPosts){
-                    list.add(new ClassPost(
-                            classPost.getId(), classPost.getClass_date(),
-                            classPost.getSubject(), classPost.getProfessor(),
-                            classPost.getTheme(), classPost.getGroups()));
+
+                    String[] strings = classPost.getClass_date().split("T");
+                    String classDate = strings[0];
+                    classesList.add(new DataModel(
+                            classPost.getId(), classPost.getSubject(), classPost.getTheme(), classDate));
                 }
-                classesList = convertTask(list);
                 adapter = new CAdapterSessions(classesList, getApplicationContext());
                 listView.setAdapter(adapter);
             }
@@ -412,24 +392,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-    private ArrayList<DataModel> convertTask(ArrayList<ClassPost> classPosts){
-        ArrayList<DataModel> data = new ArrayList<>();
-        if (classPosts.size()>0){
-            for (ClassPost classPost : classPosts){
-                int id = classPost.getId();
-                String classTheme = classPost.getTheme();
-                String classSubject = classPost.getSubject();
-                String[] strings = classPost.getClass_date().split("T");
-                String classDate = strings[0];
-                //String classDate = classPost.getClass_date();
-                data.add(new DataModel(id, classSubject, classTheme, classDate));
-            }
-        }
-        return data;
-    }
-
-
 
     private void readGroups(JSONPlaceHolderAPI jsonPlaceHolderAPI){
         group_list = new ArrayList<SpinnerWithID>();

@@ -5,12 +5,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.DocumentsContract;
+import android.support.v4.provider.DocumentFile;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -29,14 +35,27 @@ import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.eazegraph.lib.charts.PieChart;
 import org.eazegraph.lib.models.PieModel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.NetworkInterface;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -60,7 +79,7 @@ public class SessionActivity extends AppCompatActivity {
     private int questionID;
     private int LESSON_ID;
 
-    private EditText ed_question, ed_ans1, ed_ans2, ed_ans3, ed_ans4;
+    private EditText ed_question, ed_ans1, ed_ans2, ed_ans3, ed_ans4, ed_path;
     private TextView tv_subject, tv_date, tv_question_asked;
     private ListView listView;
     private PieChart pieChart;
@@ -138,11 +157,111 @@ public class SessionActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                pieChart.update();
+                adapterStudents.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
+
             }
         });
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_session, menu);
+        return true;
+    }
+
+
+    public void importExcel(MenuItem item) {
+        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        View promptsView = layoutInflater.inflate(R.layout.file_save_form, null);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                .setTitle("Сохранение файла")
+                .setView(promptsView)
+                .setPositiveButton("Сохранить", null);
+        ed_path = promptsView.findViewById(R.id.eT_path);
+        ed_path.setText("Журнал посещений за "+exDate);
+        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean opened = true;
+                String path = String.valueOf(ed_path.getText())+".xlsx";
+                if (path.equals("")) {
+                    ed_path.setError("Путь не может быть пустым");
+                    ed_path.requestFocus();
+                }else {
+                    if (saveExcelFile(path, exDate));
+                        opened = false;
+                }
+                if (!opened)
+                    alertDialog.dismiss();
+            }
+        });
+
+    }
+
+
+    private boolean saveExcelFile(String fileName, String date){
+        Workbook workbook = new HSSFWorkbook();
+        Cell cell = null;
+        CellStyle cs = workbook.createCellStyle();
+        cs.setFillBackgroundColor(HSSFColor.LIME.index);
+        cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        Sheet sheet1;
+        sheet1 = workbook.createSheet("Список студентов за "+date);
+
+        Row row = sheet1.createRow(0);
+        cell = row.createCell(0);
+        cell.setCellValue("Имя студента");
+        cell = row.createCell(1);
+        cell.setCellValue("Группа");
+
+        for (int i=0; i<studentsModels.size(); i++){
+            StudentsModel studentsModel = studentsModels.get(i);
+
+            Row row1 = sheet1.createRow(i+1);
+            cell = row1.createCell(0);
+            cell.setCellValue(studentsModel.getFullName());
+            cell = row1.createCell(1);
+            cell.setCellValue(studentsModel.getFullGroup());
+        }
+        sheet1.setColumnWidth(0, 15*500);
+        sheet1.setColumnWidth(1, 15*500);
+            File file = new File(getApplicationContext().getExternalFilesDir(null), fileName);
+            if (file.exists()){
+                Toast.makeText(getApplicationContext(),"Файл с таким именем уже существует, выберете другое название", Toast.LENGTH_LONG).show();
+                return false;
+            }else {
+                FileOutputStream os = null;
+                try {
+                    os = new FileOutputStream(file);
+                    workbook.write(os);
+                    Log.w(TAG, "Writing file " + file);
+                    os.close();
+                    return true;
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        return false;
+    }
+
+    private boolean fileExists(Context context, String fileName){
+        File file = context.getFileStreamPath(fileName);
+        if (file == null || !file.exists())
+            return false;
+        return true;
+    }
+
     private Map<String, Integer> answerMap = new HashMap<String, Integer>();
 
     private void updateGraph(){
@@ -155,7 +274,6 @@ public class SessionActivity extends AppCompatActivity {
                 for (Map.Entry entry : answerMap.entrySet()){
                     if (i<=3) {
                         pieChart.addPieSlice(new PieModel(entry.getKey().toString(), Integer.parseInt(entry.getValue().toString()), Color.parseColor(color.get(i))));
-                        System.out.println("Prohod: " + entry.getKey() + " " + entry.getValue());
                         i++;
                     }
                 }
@@ -216,13 +334,6 @@ public class SessionActivity extends AppCompatActivity {
         tv_question_asked = findViewById(R.id.tv_question_asked);
     }
 
-    private String convertDate(String date){
-        String finalDate =null;
-        String[] rowDate = date.split("/");
-        finalDate = rowDate[2]+"/"+rowDate[1]+"/"+rowDate[0].substring(rowDate[0].length()-2);
-        return finalDate;
-    }
-
     public void AddQuestion(View view){
         answerMap.clear();
         LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -265,13 +376,13 @@ public class SessionActivity extends AppCompatActivity {
                 String ans4 = String.valueOf(ed_ans4.getText());
 
                 if (question.equals("")){
-                    ed_question.setError("Question required");
+                    ed_question.setError("Поле не может быть пустым");
                     ed_question.requestFocus();
                 }else if (ans1.equals("")){
-                    ed_ans1.setError("Two answers required");
+                    ed_ans1.setError("Необходимо указать минимум два ответа");
                     ed_ans1.requestFocus();
                 }else if (ans2.equals("")){
-                    ed_ans2.setError("Two answers required");
+                    ed_ans2.setError("Необходимо указать минимум два ответа");
                     ed_ans2.requestFocus();
                 } else {
                     //Отправляем на сервер
@@ -324,12 +435,11 @@ public class SessionActivity extends AppCompatActivity {
                     for (String answer : answers)
                         jsonArray.put(answer);
                     jsonObject.put("answers_list", jsonArray);
-                    //jsonObject.put("")
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 socket.emit("CREATE_POLL", jsonObject);
-                System.out.println("Question posted");
+                Toast.makeText(getApplicationContext(), "Вопрос создан",Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -340,6 +450,7 @@ public class SessionActivity extends AppCompatActivity {
         });
 
     }
+
 
 
 }

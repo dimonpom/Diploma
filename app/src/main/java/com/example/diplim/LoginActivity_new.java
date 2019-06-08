@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -163,8 +164,6 @@ public class LoginActivity_new extends Activity {
     }
 
     private void loginContinue(){
-        System.out.println("Success login");
-
         if (isProf){
             Intent intent = new Intent(LoginActivity_new.this, MainActivity.class);
             intent.putExtra("idProf", ProfID);
@@ -177,22 +176,20 @@ public class LoginActivity_new extends Activity {
             intent.putExtra("token", TOKEN);
             startActivity(intent);
         }
-
     }
 
     private boolean validate(String email, String password) {
         boolean validInputs = true;
 
-        /*if(email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()){
-            emailText.setError("Not valid email address");
+        if(email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+            emailText.setError("Не правильный адресс почты");
             emailText.requestFocus();
             validInputs =false;
         }else {
             emailText.setError(null);
-        }*/
-
+        }
         if(password.isEmpty()){
-            passwordText.setError("Input valid password");
+            passwordText.setError("Поле не может быть пустым");
             passwordText.requestFocus();
             validInputs = false;
         }else if (password.length()<6){
@@ -257,7 +254,7 @@ public class LoginActivity_new extends Activity {
             @Override
             public void onFailure(Call<JSONResponseStud> call, Throwable t) {
                 Log.e(TAG, "-------Error when connecting auth--------\n"+t.getMessage());
-                Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Ошибка подключения", Toast.LENGTH_SHORT).show();
                 actionProcessButton.setProgress(0);
                 actionProcessButton.setClickable(true);
                 tg_stud.setClickable(true);
@@ -271,9 +268,6 @@ public class LoginActivity_new extends Activity {
         final Professor professor = new Professor(prof_login, prof_password);
 
         Call<JSONResponseProf> call = jsonPlaceHolderAPI.Authenticate_professor(professor);
-        /*actionProcessButton.setProgress(1);
-        actionProcessButton.setClickable(false);
-        signupLink.setClickable(false);*/
         call.enqueue(new Callback<JSONResponseProf>() {
             @Override
             public void onResponse(Call<JSONResponseProf> call, Response<JSONResponseProf> response) {
@@ -301,7 +295,7 @@ public class LoginActivity_new extends Activity {
             @Override
             public void onFailure(Call<JSONResponseProf> call, Throwable t) {
                 Log.e(TAG, "-------Error when connecting auth--------\n"+t.getMessage());
-                Toast.makeText(getApplicationContext(), "Connection failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Ошибка подключения", Toast.LENGTH_SHORT).show();
                 actionProcessButton.setProgress(0);
                 actionProcessButton.setClickable(true);
                 tg_stud.setClickable(true);
