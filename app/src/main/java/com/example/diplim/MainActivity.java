@@ -170,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("date", dataModel.getDate());
                 intent.putExtra("subject", dataModel.getSubject());
                 intent.putExtra("theme", dataModel.getTheme());
+                intent.putExtra("token", TOKEN);
                 startActivity(intent);
             }
         });

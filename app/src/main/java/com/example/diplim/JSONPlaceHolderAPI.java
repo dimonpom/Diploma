@@ -12,6 +12,7 @@ import com.example.diplim.dbModels.Professor;
 import com.example.diplim.dbModels.Professor_register;
 import com.example.diplim.dbModels.Question_answer;
 import com.example.diplim.dbModels.Question_post;
+import com.example.diplim.dbModels.StudClass_get;
 import com.example.diplim.dbModels.Student_login;
 import com.example.diplim.dbModels.Student_register;
 import com.example.diplim.dbModels.SubjectPost;
@@ -90,6 +91,9 @@ public interface JSONPlaceHolderAPI {
 
     @GET("classes/professors/{professor_id}")
     Call<List<ClassPost>> getClassByProfessor(@Header("Authorization") String authKey, @Path("professor_id") int id);
+
+    @GET("students/classes/{class_id}")
+    Call<List<StudClass_get>> getStudentsByClass(@Header("Authorization") String authKey, @Path("class_id") int id);
 
     //------------------Socket-based
 

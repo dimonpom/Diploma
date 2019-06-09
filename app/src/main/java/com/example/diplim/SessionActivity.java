@@ -28,6 +28,7 @@ import com.example.diplim.dbModels.Answer_answer;
 import com.example.diplim.dbModels.Answer_post;
 import com.example.diplim.dbModels.Question_answer;
 import com.example.diplim.dbModels.Question_post;
+import com.example.diplim.dbModels.StudClass_get;
 import com.example.diplim.dbModels.StudentsModel;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -61,6 +62,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -76,7 +78,7 @@ public class SessionActivity extends AppCompatActivity {
     final Context context = this;
     private static final String TAG="SessionActivity";
 
-    private int questionID;
+    private String TOKEN;
     private int LESSON_ID;
 
     private EditText ed_question, ed_ans1, ed_ans2, ed_ans3, ed_ans4, ed_path;
@@ -105,6 +107,7 @@ public class SessionActivity extends AppCompatActivity {
             exSubject = args.getString("subject");
             exTheme = args.getString("theme");
             exDate = args.getString("date");
+            TOKEN = args.getString("token");
             LESSON_ID = 42;//args.getInt("id");
         }
 
@@ -127,7 +130,7 @@ public class SessionActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.lv_students);
         studentsModels = new ArrayList<>();
-        studentsModels.add(new StudentsModel("Петрович Петров Рофлов","321 Б"));
+        /*studentsModels.add(new StudentsModel("Петрович Петров Рофлов","321 Б"));
         studentsModels.add(new StudentsModel("Веселов Гурий Ефимович","321 Б"));
         studentsModels.add(new StudentsModel("Молчанов Алан Алексеевич","321 Б"));
         studentsModels.add(new StudentsModel("Журавлёв Тимур Улебович","321 А"));
@@ -142,7 +145,7 @@ public class SessionActivity extends AppCompatActivity {
         studentsModels.add(new StudentsModel("Осипов Матвей Сергеевич","321 Б"));
         studentsModels.add(new StudentsModel("Пилипейко Донат Владимирович","321 А"));
         studentsModels.add(new StudentsModel("Стегайло Гордей Анатолиевич","321 А"));
-        studentsModels.add(new StudentsModel("Селезнёв Пётр Романович","321 Б"));
+        studentsModels.add(new StudentsModel("Селезнёв Пётр Романович","321 Б"));*/
 
         pieChart.addPieSlice(new PieModel("Понравилось", 20, Color.parseColor(color.get(1))));
         pieChart.addPieSlice(new PieModel("Скорее понравилось", 12, Color.parseColor(color.get(2))));
@@ -157,9 +160,9 @@ public class SessionActivity extends AppCompatActivity {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                adapterStudents.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
+                getStudentsPresent(jsonPlaceHolderAPI, LESSON_ID);
 
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
     }
@@ -253,13 +256,6 @@ public class SessionActivity extends AppCompatActivity {
                 }
             }
         return false;
-    }
-
-    private boolean fileExists(Context context, String fileName){
-        File file = context.getFileStreamPath(fileName);
-        if (file == null || !file.exists())
-            return false;
-        return true;
     }
 
     private Map<String, Integer> answerMap = new HashMap<String, Integer>();
@@ -411,6 +407,29 @@ public class SessionActivity extends AppCompatActivity {
         });
     }
 
+    private void getStudentsPresent(JSONPlaceHolderAPI jsonPlaceHolderAPI, final int class_id){
+        Call<List<StudClass_get>> call = jsonPlaceHolderAPI.getStudentsByClass(TOKEN,class_id);
+        call.enqueue(new Callback<List<StudClass_get>>() {
+            @Override
+            public void onResponse(Call<List<StudClass_get>> call, Response<List<StudClass_get>> response) {
+                if (!response.isSuccessful()){
+                    Log.e(TAG, "------Not successful response with code: "+response.code());
+                    return;
+                }
+                List<StudClass_get> studClass_gets = response.body();
+                for (StudClass_get studClass_get : studClass_gets){
+                    studentsModels.add(new StudentsModel(studClass_get.getStudent_name(),studClass_get.getGroup_name()));
+                }
+                adapterStudents.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<List<StudClass_get>> call, Throwable t) {
+                Log.e(TAG, "-------Error when connecting auth--------\n"+t.getMessage());
+                Toast.makeText(getApplicationContext(), "Ошибка подключения к серверу", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     private void createQuestion(JSONPlaceHolderAPI jsonPlaceHolderAPI, final String question, final int lessonID, final int quantity, final ArrayList<String> answers) {
         final Question_post question_post = new Question_post(question);
