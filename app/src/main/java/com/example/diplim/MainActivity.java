@@ -25,9 +25,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.diplim.CustomListViews.CAdapterSessions;
+import com.example.diplim.dbModels.CreateClasses_answer;
+import com.example.diplim.dbModels.CreateClasses_post;
 import com.example.diplim.dbModels.DataModel;
 import com.example.diplim.dbModels.ClassPost;
 import com.example.diplim.dbModels.Group;
+import com.example.diplim.dbModels.GroupsInClass_post;
 import com.example.diplim.dbModels.SpinnerWithID;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -122,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
         if (!nocon) {
-            readClassesbyProf(jsonPlaceHolderAPI, 1, TOKEN);
+            readClassesbyProf(jsonPlaceHolderAPI, ProfID, TOKEN);
         }else {
             classesList.add(new DataModel(1,"Предмет","Тема", "10-03-1998"));
             classesList.add(new DataModel(1,"Предмет2","Тема2", "12-04-1998"));
@@ -183,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        readClassesbyProf(jsonPlaceHolderAPI, 1, finalTOKEN);
+                        readClassesbyProf(jsonPlaceHolderAPI, ProfID, finalTOKEN);
                         swipeRefreshLayout.setRefreshing(false);
                     }
                 }, 2500);
@@ -323,13 +326,14 @@ public class MainActivity extends AppCompatActivity {
 
                 String theme = String.valueOf(themeEd.getText());
                 String subject = String.valueOf(subjectSpinner.getSelectedItem());
-                String date = RqYear+"/"+RqMonth+"/"+RqDay;
+                String date = RqYear+"-0"+RqMonth+"-"+RqDay+"T00:00:00Z";
 
                 if (theme.equals("")) {
                     themeEd.setError("Обязательное поле");
                     themeEd.requestFocus();
                 }else {
                     //Отправляем на сервер
+                    createClass(jsonPlaceHolderAPI,date,17,ProfID,theme);
 
                     opened = false;
                 }
@@ -337,6 +341,55 @@ public class MainActivity extends AppCompatActivity {
                 if (!opened){
                     alertDialog.dismiss();
                 }
+            }
+        });
+    }
+
+    private void createClass(final JSONPlaceHolderAPI jsonPlaceHolderAPI, String date, int subject, int prof, String theme){
+        System.out.println(date+" "+subject+" "+theme+" "+prof);
+        CreateClasses_post createClasses_post = new CreateClasses_post(date, subject, prof, theme);
+        Call<CreateClasses_answer> call = jsonPlaceHolderAPI.createClass(TOKEN, createClasses_post);
+        call.enqueue(new Callback<CreateClasses_answer>() {
+            @Override
+            public void onResponse(Call<CreateClasses_answer> call, Response<CreateClasses_answer> response) {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, "------Not successful response with code: " + response.code()
+                            + "\n Response message: "+response.raw());
+                    return;
+                }
+                CreateClasses_answer createClasses_answer = response.body();
+                int classId = createClasses_answer.getClass_id();
+                createGroupInClass(jsonPlaceHolderAPI, 1, classId);
+                createGroupInClass(jsonPlaceHolderAPI, 2, classId);
+                createGroupInClass(jsonPlaceHolderAPI, 3, classId);
+                createGroupInClass(jsonPlaceHolderAPI, 4, classId);
+                createGroupInClass(jsonPlaceHolderAPI, 5, classId);
+            }
+
+            @Override
+            public void onFailure(Call<CreateClasses_answer> call, Throwable t) {
+                Log.e(TAG, "-------Error when connecting--------\n"+t.getMessage());
+            }
+        });
+    }
+
+    private void createGroupInClass(JSONPlaceHolderAPI jsonPlaceHolderAPI, int groupId, int classId){
+        GroupsInClass_post groupsInClass_post = new GroupsInClass_post(groupId, classId);
+        Call<Void> call = jsonPlaceHolderAPI.createGroupsInClass(TOKEN, groupsInClass_post);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, "------Not successful response with code: " + response.code()
+                            + "\n Response message: "+response.raw());
+                    return;
+                }
+                Log.i(TAG, "--Успех полнейший");
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e(TAG, "-------Error when connecting--------\n"+t.getMessage());
             }
         });
     }
@@ -354,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 List<ClassPost> classPosts = response.body();
-
+                classesList.clear();
                 for (ClassPost classPost : classPosts){
 
                     String[] strings = classPost.getClass_date().split("T");

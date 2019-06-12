@@ -169,6 +169,7 @@ public class SignupActivity extends AppCompatActivity {
             Intent intent = new Intent(SignupActivity.this, MainActivity_stud.class);
             intent.putExtra("idGroup", GroupID);
             intent.putExtra("token", TOKEN);
+            intent.putExtra("idStud", StudID);
             startActivity(intent);
             finish();
         }

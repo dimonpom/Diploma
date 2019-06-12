@@ -83,8 +83,7 @@
                 android:drawableRight="@drawable/user"
                 android:hint="Email"
                 android:inputType="textEmailAddress"
-                android:paddingTop="@dimen/floating_hint_margin"
-                android:text="login@" />
+                android:paddingTop="@dimen/floating_hint_margin"/>
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Label -->
@@ -102,8 +101,7 @@
                 android:drawableRight="@drawable/lock"
                 android:hint="Password"
                 android:inputType="textPassword"
-                android:paddingTop="@dimen/floating_hint_margin"
-                android:text="25435f" />
+                android:paddingTop="@dimen/floating_hint_margin" />
         </android.support.design.widget.TextInputLayout>
 
         <com.dd.processbutton.iml.ActionProcessButton

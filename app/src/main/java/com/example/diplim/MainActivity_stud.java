@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +35,8 @@ public class MainActivity_stud extends AppCompatActivity {
     private ArrayList<DataModel_stud> classesList_stud = new ArrayList<>();
 
     private ListView listView;
+    private SwipeRefreshLayout swipeRefreshLayout;
+
     private String TOKEN;
     private Integer GroupID;
     private int StudID;
@@ -63,9 +66,6 @@ public class MainActivity_stud extends AppCompatActivity {
 
         jsonPlaceHolderAPI = retrofit.create(JSONPlaceHolderAPI.class);
 
-        /*classesList_stud.add(new DataModel_stud(1, "TEST", "Test Testov Testovich", "1998-05-03"));
-        classesList_stud.add(new DataModel_stud(2, "TEST1", "Test Testov Testovich3", "1998-01-27"));
-        classesList_stud.add(new DataModel_stud(13, "TEST2", "Test Testov Testovich1231", "1998-04-03"));*/
         readClassesByStud(jsonPlaceHolderAPI, StudID, TOKEN);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -108,6 +108,14 @@ public class MainActivity_stud extends AppCompatActivity {
             }
         });
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                readClassesByStud(jsonPlaceHolderAPI, StudID, TOKEN);
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
         System.out.println("TOKEN"+TOKEN);
 
     }
@@ -132,6 +140,7 @@ public class MainActivity_stud extends AppCompatActivity {
 
     private void initializeXML() {
         listView = findViewById(R.id.listview);
+        swipeRefreshLayout = findViewById(R.id.activity_main_stud_swipe_refresh_layout);
     }
 
     private void readClassesByStud(JSONPlaceHolderAPI jsonPlaceHolderAPI,int student_id, String TOKEN){
@@ -145,6 +154,7 @@ public class MainActivity_stud extends AppCompatActivity {
                     return;
                 }
                 List<ClassStud_get> classStud_gets = response.body();
+                classesList_stud.clear();
                 for (ClassStud_get classStud_get : classStud_gets){
                     String[] strings = classStud_get.getClass_date().split("T");
                     String classDate = strings[0];

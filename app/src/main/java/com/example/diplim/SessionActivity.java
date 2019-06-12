@@ -108,7 +108,8 @@ public class SessionActivity extends AppCompatActivity {
             exTheme = args.getString("theme");
             exDate = args.getString("date");
             TOKEN = args.getString("token");
-            LESSON_ID = 42;//args.getInt("id");
+            LESSON_ID = args.getInt("id");
+            System.out.println("------------"+LESSON_ID);
         }
 
         initializeXML();
@@ -147,12 +148,12 @@ public class SessionActivity extends AppCompatActivity {
         studentsModels.add(new StudentsModel("Стегайло Гордей Анатолиевич","321 А"));
         studentsModels.add(new StudentsModel("Селезнёв Пётр Романович","321 Б"));*/
 
-        pieChart.addPieSlice(new PieModel("Понравилось", 20, Color.parseColor(color.get(1))));
+        /*pieChart.addPieSlice(new PieModel("Понравилось", 20, Color.parseColor(color.get(1))));
         pieChart.addPieSlice(new PieModel("Скорее понравилось", 12, Color.parseColor(color.get(2))));
         pieChart.addPieSlice(new PieModel("Больше не понравилось, чем понравилось", 3, Color.parseColor(color.get(3))));
-        pieChart.addPieSlice(new PieModel("Не понравилось", 6, Color.parseColor(color.get(0))));
-        tv_question_asked.setText("Понравилось ли вам занятие?");
-
+        pieChart.addPieSlice(new PieModel("Не понравилось", 6, Color.parseColor(color.get(0))));*/
+        /*tv_question_asked.setText("Понравилось ли вам занятие?");*/
+        getStudentsPresent(jsonPlaceHolderAPI, LESSON_ID);
         adapterStudents = new CAdapterStudents(studentsModels, getApplicationContext());
         listView.setAdapter(adapterStudents);
        // updateGraph();
@@ -416,6 +417,7 @@ public class SessionActivity extends AppCompatActivity {
                     Log.e(TAG, "------Not successful response with code: "+response.code());
                     return;
                 }
+                studentsModels.clear();
                 List<StudClass_get> studClass_gets = response.body();
                 for (StudClass_get studClass_get : studClass_gets){
                     studentsModels.add(new StudentsModel(studClass_get.getStudent_name(),studClass_get.getGroup_name()));

@@ -4,7 +4,10 @@ import com.example.diplim.dbModels.Answer_answer;
 import com.example.diplim.dbModels.Answer_post;
 import com.example.diplim.dbModels.ClassPost;
 import com.example.diplim.dbModels.ClassStud_get;
+import com.example.diplim.dbModels.CreateClasses_answer;
+import com.example.diplim.dbModels.CreateClasses_post;
 import com.example.diplim.dbModels.Group;
+import com.example.diplim.dbModels.GroupsInClass_post;
 import com.example.diplim.dbModels.JSONResponseProf;
 import com.example.diplim.dbModels.JSONResponseStud;
 import com.example.diplim.dbModels.Presence_post;
@@ -95,6 +98,11 @@ public interface JSONPlaceHolderAPI {
     @GET("students/classes/{class_id}")
     Call<List<StudClass_get>> getStudentsByClass(@Header("Authorization") String authKey, @Path("class_id") int id);
 
+    @POST("/classes")
+    Call<CreateClasses_answer> createClass(@Header("Authorization") String authKey, @Body CreateClasses_post createClasses_post);
+
+    @POST("classes/groups")
+    Call<Void> createGroupsInClass(@Header("Authorization") String authKey, @Body GroupsInClass_post groupsInClass_post);
     //------------------Socket-based
 
     @POST("questions")

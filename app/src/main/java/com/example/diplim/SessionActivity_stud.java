@@ -61,7 +61,7 @@ public class SessionActivity_stud extends AppCompatActivity {
         if (args!=null){
             exDate = args.getString("date");
             exSubject = args.getString("subject");
-            LESSON_ID = 42;//args.getInt("id");
+            LESSON_ID = args.getInt("id");
             STUDENT_ID = args.getInt("studID");
         }
         tv_date.setText(exDate);

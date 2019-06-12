@@ -128,8 +128,7 @@
                 android:drawableRight="@drawable/user"
                 android:hint="ФИО"
                 android:inputType="textCapWords"
-                android:paddingTop="@dimen/floating_hint_margin"
-                android:text="Начальник завода" />
+                android:paddingTop="@dimen/floating_hint_margin"/>
         </android.support.design.widget.TextInputLayout>
 
         <!-- Email Label -->
@@ -147,8 +146,7 @@
                 android:drawableRight="@drawable/at"
                 android:hint="Email"
                 android:inputType="textEmailAddress"
-                android:paddingTop="@dimen/floating_hint_margin"
-                android:text="nachz@gmail.com" />
+                android:paddingTop="@dimen/floating_hint_margin"/>
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Label -->
@@ -166,8 +164,7 @@
                 android:drawableRight="@drawable/lock"
                 android:hint="Пароль"
                 android:inputType="textPassword"
-                android:paddingTop="@dimen/floating_hint_margin"
-                android:text="25435f" />
+                android:paddingTop="@dimen/floating_hint_margin" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
@@ -183,8 +180,7 @@
                 android:background="@drawable/custom_edit_text"
                 android:hint="Подтверждение пароля"
                 android:inputType="textPassword"
-                android:paddingTop="@dimen/floating_hint_margin"
-                android:text="25435f" />
+                android:paddingTop="@dimen/floating_hint_margin"/>
         </android.support.design.widget.TextInputLayout>
 
         <!-- Signup Button -->

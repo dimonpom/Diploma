@@ -8,14 +8,17 @@
 
     <TextView
         android:id="@+id/tv_studName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
         android:layout_marginLeft="2dp"
         android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:text="Экология"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@android:color/black"
+        app:layout_constraintEnd_toStartOf="@+id/tV_date"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
